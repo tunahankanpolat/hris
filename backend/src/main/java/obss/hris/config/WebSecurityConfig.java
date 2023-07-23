@@ -1,19 +1,21 @@
 package obss.hris.config;
 
+import obss.hris.business.concretes.LinkedinOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.security.config.Customizer;
+import org.springframework.ldap.core.support.BaseLdapPathContextSource;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.endpoint.DefaultMapOAuth2AccessTokenResponseConverter;
-import org.springframework.security.oauth2.core.endpoint.DefaultOAuth2AccessTokenResponseMapConverter;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
@@ -32,21 +34,37 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-public class OAuth2LoginSecurityConfig {
+public class WebSecurityConfig {
+    @Bean
+    LdapAuthoritiesPopulator authorities(BaseLdapPathContextSource contextSource) {
+        String groupSearchBase = "ou=groups";
+        DefaultLdapAuthoritiesPopulator authorities = new DefaultLdapAuthoritiesPopulator(contextSource, groupSearchBase);
+        authorities.setGroupSearchFilter("(member={0})");
+        return authorities;
+    }
 
+    @Bean
+    AuthenticationManager authenticationManager(BaseLdapPathContextSource contextSource, LdapAuthoritiesPopulator authorities) {
+        LdapBindAuthenticationManagerFactory factory = new LdapBindAuthenticationManagerFactory(contextSource);
+        factory.setUserSearchBase("ou=people");
+        factory.setUserSearchFilter("(uid={0})");
+        return factory.createAuthenticationManager();
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-//                        .anyRequest().authenticated()
-                        .requestMatchers("loginn").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
+//                        .requestMatchers("loginn").authenticated()
+//                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .tokenEndpoint(token -> token.accessTokenResponseClient(linkedinTokenResponseClient())
-                        )
-                );
+                        .tokenEndpoint(token
+                                -> token.accessTokenResponseClient(linkedinTokenResponseClient()))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(new LinkedinOAuth2UserService()))
+                ).formLogin(withDefaults());
         return http.build();
     }
     private static DefaultAuthorizationCodeTokenResponseClient linkedinTokenResponseClient() {

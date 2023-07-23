@@ -1,4 +1,4 @@
-package obss.hris.util;
+package obss.hris.core.util.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
