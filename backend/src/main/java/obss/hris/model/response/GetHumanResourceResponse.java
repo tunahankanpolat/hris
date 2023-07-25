@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetHumanResourceResponse {
+    private String userName;
     private String firstName;
     private String lastName;
 }

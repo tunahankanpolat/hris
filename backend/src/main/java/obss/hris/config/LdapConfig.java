@@ -1,6 +1,6 @@
 package obss.hris.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +16,10 @@ import org.springframework.ldap.core.support.LdapContextSource;
 @ComponentScan(basePackages = {"obss.hris.*"})
 @Profile("default")
 @EnableLdapRepositories(basePackages = "tech.obss.**")
+@AllArgsConstructor
 public class LdapConfig {
     private Environment env;
 
-    @Autowired
-    public LdapConfig(Environment env) {
-        this.env = env;
-    }
     @Bean
     public LdapContextSource contextSource() {
         LdapContextSource contextSource = new LdapContextSource();

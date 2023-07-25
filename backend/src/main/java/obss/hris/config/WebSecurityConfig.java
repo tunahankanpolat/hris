@@ -4,6 +4,7 @@ import obss.hris.business.concretes.LinkedinOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.ldap.core.support.BaseLdapPathContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,10 +54,11 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .cors(withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated()
-//                        .requestMatchers("loginn").authenticated()
+                        .requestMatchers(HttpMethod.POST,"login").permitAll()
+                                .anyRequest().authenticated()
 //                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2

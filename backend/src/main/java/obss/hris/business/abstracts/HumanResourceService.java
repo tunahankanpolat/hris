@@ -1,7 +1,9 @@
 package obss.hris.business.abstracts;
 
-import obss.hris.model.response.GetHumanResourceResponse;
+import obss.hris.model.entity.HumanResource;
 
 public interface HumanResourceService {
-    GetHumanResourceResponse getByUsername(String username);
+    HumanResource createHumanResource(HumanResource humanResource);
+
+    HumanResource getByUserName(String userName);
 }

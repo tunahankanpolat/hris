@@ -15,9 +15,9 @@ import org.springframework.ldap.odm.annotations.Id;
 @Data
 public class LdapPeople {
     @Id
-    private Name id;
+    private Name dn;
 
-    private @Attribute(name = "uid") String username;
+    private @Attribute(name = "uid") String userName;
     private @Attribute(name = "cn") String firstName;
     private @Attribute(name = "sn") String lastName;
 

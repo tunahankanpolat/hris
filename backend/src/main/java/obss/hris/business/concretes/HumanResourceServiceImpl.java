@@ -1,27 +1,25 @@
 package obss.hris.business.concretes;
 
+import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.HumanResourceService;
-import obss.hris.dataAccess.HumanResourceRepository;
-import obss.hris.dataAccess.LdapHrRepository;
-import obss.hris.model.LdapPeople;
-import obss.hris.model.response.GetHumanResourceResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import obss.hris.model.entity.HumanResource;
+import obss.hris.repository.HumanResourceRepository;
 import org.springframework.stereotype.Service;
 
+
 @Service
+@AllArgsConstructor
 public class HumanResourceServiceImpl implements HumanResourceService {
     private HumanResourceRepository humanResourceRepository;
 
-    private LdapHrRepository ldapHrRepository;
 
-
-    @Autowired
-    public HumanResourceServiceImpl(LdapHrRepository ldapHrRepository) {
-        this.ldapHrRepository = ldapHrRepository;
+    @Override
+    public HumanResource createHumanResource(HumanResource humanResource) {
+        return humanResourceRepository.save(humanResource);
     }
 
-    public GetHumanResourceResponse getByUsername(String username) {
-        LdapPeople ldapPeople = ldapHrRepository.findByUsername(username);
-        return new GetHumanResourceResponse(ldapPeople.getFirstName(), ldapPeople.getLastName());
+    @Override
+    public HumanResource getByUserName(String userName) {
+        return humanResourceRepository.findByUserName(userName);
     }
 }

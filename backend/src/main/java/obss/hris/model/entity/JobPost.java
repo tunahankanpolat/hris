@@ -3,20 +3,19 @@ package obss.hris.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "job_posts")
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobPost {
     @Id
+    @Column(name = "job_post_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

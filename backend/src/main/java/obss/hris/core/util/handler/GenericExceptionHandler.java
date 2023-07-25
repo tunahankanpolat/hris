@@ -1,5 +1,6 @@
 package obss.hris.core.util.handler;
 
+import obss.hris.exception.JobPostNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ldap.AuthenticationException;
@@ -17,6 +18,13 @@ public class GenericExceptionHandler {
         Map<String, String> errorResponseMap = new HashMap<>();
         errorResponseMap.put("error_message", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponseMap);
+    }
+
+    @ExceptionHandler(JobPostNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleJobPostNotFoundException(JobPostNotFoundException e) {
+        Map<String, String> errorResponseMap = new HashMap<>();
+        errorResponseMap.put("error_message", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseMap);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
