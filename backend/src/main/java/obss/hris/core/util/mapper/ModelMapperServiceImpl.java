@@ -11,6 +11,15 @@ public class ModelMapperServiceImpl implements ModelMapperService {
     private ModelMapper modelMapper;
 
     @Override
+    public ModelMapper forCreate() {
+        this.modelMapper.getConfiguration()
+                .setAmbiguityIgnored(true)
+                .setMatchingStrategy(MatchingStrategies.STRICT);
+                //.setPropertyCondition(context -> !context.getMapping().getLastDestinationProperty().getName().equals("id"));
+        return this.modelMapper;
+    }
+
+    @Override
     public ModelMapper forResponse() {
         this.modelMapper.getConfiguration()
                 .setAmbiguityIgnored(true)

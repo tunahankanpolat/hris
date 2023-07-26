@@ -17,7 +17,7 @@ public class HumanResource {
     @Id
     @Column(name = "human_resource_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long humanResourceId;
 
     @NotNull
     @NotBlank

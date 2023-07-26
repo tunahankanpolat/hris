@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,7 +18,7 @@ public class JobPost {
     @Id
     @Column(name = "job_post_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long jobPostId;
 
     @NotNull
     @NotBlank
@@ -45,4 +46,8 @@ public class JobPost {
     @ManyToOne
     @JoinColumn(name = "human_resource_id")
     private HumanResource humanResource;
+
+    @OneToMany(mappedBy = "jobPost")
+    private List<JobApplication> jobApplications;
+
 }

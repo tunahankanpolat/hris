@@ -10,14 +10,19 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "candidates")
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "candidates",
+        indexes = {@Index(name = "candidate_linkedin_id_index", columnList = "linkedin_id")})
+
 public class Candidate {
     @Id
     @Column(name = "candidate_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long candidateId;
+
+    @Column(name = "linkedin_id")
+    private String linkedinId;
 
     @NotNull
     @NotBlank

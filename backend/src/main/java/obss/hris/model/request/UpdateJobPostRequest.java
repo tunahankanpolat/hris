@@ -10,7 +10,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateJobPostRequest {
-    private Long id;
+    private Long jobPostId;
     private String title;
     private String description;
     private Date activationTime;

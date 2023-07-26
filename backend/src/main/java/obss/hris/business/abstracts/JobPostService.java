@@ -3,6 +3,7 @@ package obss.hris.business.abstracts;
 import obss.hris.model.entity.JobPost;
 import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.UpdateJobPostRequest;
+import obss.hris.model.response.GetJobPostApplicationResponse;
 import obss.hris.model.response.GetJobPostResponse;
 
 import java.util.List;
@@ -10,9 +11,13 @@ import java.util.List;
 public interface JobPostService {
     List<GetJobPostResponse> getJobPosts();
 
+    List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size);
+
     List<GetJobPostResponse> jobPostsByPage(int page, int size);
 
-    GetJobPostResponse getJobPost(Long jobPostId);
+    GetJobPostResponse getJobPostByIdForRequest(Long jobPostId);
+
+    JobPost getJobPostById(Long jobPostId);
 
     List<GetJobPostResponse> getJobPostsByCreator(String userName);
 

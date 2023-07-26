@@ -1,6 +1,7 @@
 package obss.hris.config;
 
 import obss.hris.business.concretes.LinkedinOAuth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -36,6 +37,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+    @Autowired
+    LinkedinOAuth2UserService linkedinOAuth2UserService;
     @Bean
     LdapAuthoritiesPopulator authorities(BaseLdapPathContextSource contextSource) {
         String groupSearchBase = "ou=groups";
@@ -58,14 +61,15 @@ public class WebSecurityConfig {
                 .cors(withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST,"login").permitAll()
-                                .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/me").hasAuthority("OAUTH2_USER")
+                        .anyRequest().authenticated()
 //                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token
                                 -> token.accessTokenResponseClient(linkedinTokenResponseClient()))
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(new LinkedinOAuth2UserService()))
+                                .userService(this.linkedinOAuth2UserService))
                 ).formLogin(withDefaults());
         return http.build();
     }

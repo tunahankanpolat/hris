@@ -2,6 +2,7 @@ package obss.hris.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Date;
 
@@ -15,11 +16,12 @@ public class JobApplication {
     @Id
     @Column(name = "job_application_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long jobApplicationId;
 
     private JobApplicationStatus status = JobApplicationStatus.PROCESSING;
 
-    @Column(name = "application_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "application_time", nullable = false, updatable = false)
+    @CreationTimestamp
     private Date applicationTime;
 
     @ManyToOne

@@ -11,13 +11,10 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class HumanResourceServiceImpl implements HumanResourceService {
     private HumanResourceRepository humanResourceRepository;
-
-
     @Override
     public HumanResource createHumanResource(HumanResource humanResource) {
         return humanResourceRepository.save(humanResource);
     }
-
     @Override
     public HumanResource getByUserName(String userName) {
         return humanResourceRepository.findByUserName(userName);

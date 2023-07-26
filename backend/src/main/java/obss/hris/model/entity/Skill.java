@@ -15,7 +15,7 @@ public class Skill {
     @Id
     @Column(name = "skill_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long skillId;
 
     @NotNull
     @NotBlank

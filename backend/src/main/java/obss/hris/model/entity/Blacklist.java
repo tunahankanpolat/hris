@@ -15,7 +15,7 @@ public class Blacklist {
     @Id
     @Column(name = "blacklist_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long blacklistId;
 
     @ManyToOne
     @NotNull
