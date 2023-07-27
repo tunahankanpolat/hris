@@ -40,11 +40,8 @@ public class Candidate {
 
     private String about;
 
-    @ManyToMany
-    @JoinTable(name = "candidate_skills",
-            joinColumns = @JoinColumn(name = "candidate_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<Skill> skills;
+    @ElementCollection
+    private List<String> skills;
 
     @Column(name="is_banned", columnDefinition = "boolean default false")
     private boolean isBanned;

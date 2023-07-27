@@ -4,6 +4,10 @@ import obss.hris.business.abstracts.CandidateService;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.model.entity.Candidate;
 import org.json.JSONObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -26,14 +30,16 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownContentTypeException;
 
 import java.net.URI;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
 
     private final String userEmailUri = "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))";
-    private final String rapidApi = "https://linkedin-profiles-and-company-data.p.rapidapi.com/profile-details";
     private static final String INVALID_USER_INFO_RESPONSE_ERROR_CODE = "invalid_user_info_response";
 
     private static final ParameterizedTypeReference<Map<String, Object>> PARAMETERIZED_RESPONSE_TYPE = new ParameterizedTypeReference<Map<String, Object>>() {};
@@ -45,31 +51,13 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
     private ModelMapperService modelMapperService;
 
     @Autowired
-    public LinkedinOAuth2UserService(CandidateService candidateService, ModelMapperService modelMapperService) {
+    public LinkedinOAuth2UserService(CandidateService candidateService, ModelMapperService modelMapperService, WebDriver webDriver) {
         super();
         this.candidateService = candidateService;
         this.modelMapperService = modelMapperService;
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         this.restOperations = restTemplate;
-    }
-
-    public void getUserDataFromRapidApi(){
-        MultiValueMap headers = new LinkedMultiValueMap<String,String>();
-        headers.add("Accept", "application/json");
-        headers.add("X-RapidAPI-Key", "6baf1f8933msh621c403aef25854p10ceb6jsn5c738a4ce569");
-        headers.add("X-RapidAPI-Host", "linkedin-profiles-and-company-data.p.rapidapi.com");
-
-        Map body = new HashMap<String, Object>();
-        body.put("profile_id", "tunahankanpolat");
-        body.put("profile_type", "personal");
-        body.put("contact_info", false);
-        body.put("recommendations", false);
-        body.put("related_profiles", false);
-
-        URI uri = URI.create(rapidApi);
-        RequestEntity request = new RequestEntity(body, headers, HttpMethod.POST, uri);
-        ResponseEntity<Map<String, Object>> response = this.restOperations.exchange(request, PARAMETERIZED_RESPONSE_TYPE);
     }
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {

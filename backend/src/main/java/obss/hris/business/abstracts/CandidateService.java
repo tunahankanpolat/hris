@@ -3,6 +3,8 @@ package obss.hris.business.abstracts;
 import obss.hris.model.entity.Candidate;
 import obss.hris.model.response.GetCandidateResponse;
 
+import java.util.List;
+
 public interface CandidateService {
 
     GetCandidateResponse getCandidateFromSecurityContext();
@@ -15,4 +17,5 @@ public interface CandidateService {
 
     Candidate getCandidateById(Long candidateId);
 
+    List<String> scrapeSkillsFromLinkedin(String linkedinUrl);
 }

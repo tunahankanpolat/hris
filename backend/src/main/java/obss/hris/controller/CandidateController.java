@@ -27,6 +27,11 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.getCandidateByIdForRequest(candidateId));
     }
 
+    @GetMapping("skills/scrape")
+    public ResponseEntity<List<String>> scrapeSkillsFromLinkedin(@RequestParam String linkedinUrl) {
+        return ResponseEntity.ok(candidateService.scrapeSkillsFromLinkedin(linkedinUrl));
+    }
+
     @GetMapping("me/jobApplications/{page}/{size}")
     public ResponseEntity<List<GetCandidateJobApplicationResponse>> getCandidateJobApplicationsByPage
             (@PathVariable int page,

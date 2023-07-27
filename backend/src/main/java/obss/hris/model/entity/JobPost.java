@@ -50,4 +50,7 @@ public class JobPost {
     @OneToMany(mappedBy = "jobPost")
     private List<JobApplication> jobApplications;
 
+    @ElementCollection
+    private List<String> skills;
+
 }
