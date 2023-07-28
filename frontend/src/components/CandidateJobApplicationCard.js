@@ -20,16 +20,16 @@ export default function CandidateJobApplicationCard(props) {
         </div>
         <div className="flex flex-col justify-center items-center">
           {(() => {
-            if (props.state === "WAITING")
-              return (
-                <div className=" flex justify-between items-center item gap-3">
-                  <HourglassTopIcon className="text-obss-gray" />
-                  <div className="text-xs text-obss-gray whitespace-break-spaces ">
-                    Başvuru{"\n"}İletildi
-                  </div>
-                </div>
-              );
-            else if (props.state === "PROCESSING")
+            // if (props.state === "WAITING")
+            //   return (
+            //     <div className=" flex justify-between items-center item gap-3">
+            //       <HourglassTopIcon className="text-obss-gray" />
+            //       <div className="text-xs text-obss-gray whitespace-break-spaces ">
+            //         Başvuru{"\n"}İletildi
+            //       </div>
+            //     </div>
+            //   );
+            if (props.state === "PROCESSING")
               return (
                 <div className=" flex justify-between items-center item gap-3">
                   <SyncIcon className="text-orange-200" />

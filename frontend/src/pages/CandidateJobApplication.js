@@ -13,10 +13,10 @@ export default function CandidateJobApplication() {
           <CandidateJobApplicationCard state="ACCEPTED" />
           <CandidateJobApplicationCard state="REJECTED" />
           <CandidateJobApplicationCard state="ACCEPTED" />
-          <CandidateJobApplicationCard state="WAITING" />
+          <CandidateJobApplicationCard state="PROCESSING" />
           <CandidateJobApplicationCard state="REJECTED" />
           <CandidateJobApplicationCard state="ACCEPTED" />
-          <CandidateJobApplicationCard state="WAITING" />
+          <CandidateJobApplicationCard state="PROCESSING" />
           <CandidateJobApplicationCard state="PROCESSING" />
           <CandidateJobApplicationCard state="PROCESSING" />
           <CandidateJobApplicationCard state="REJECTED" />
