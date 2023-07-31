@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateJobApplicationRequest {
-    private Long candidateId;
-    private Long jobPostId;
+public class HumanResourceLoginRequest {
+    private String userName;
+    private String password;
 }

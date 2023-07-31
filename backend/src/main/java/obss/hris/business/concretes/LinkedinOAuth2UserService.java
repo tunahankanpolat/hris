@@ -1,14 +1,8 @@
 package obss.hris.business.concretes;
 
-import obss.hris.business.abstracts.CandidateService;
-import obss.hris.core.util.mapper.ModelMapperService;
-import obss.hris.model.entity.Candidate;
 import org.json.JSONObject;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
@@ -30,31 +24,22 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownContentTypeException;
 
 import java.net.URI;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
 public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
-
-    private final String userEmailUri = "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))";
+    @Value("${linkedin.email.api}")
+    private String userEmailUri;
     private static final String INVALID_USER_INFO_RESPONSE_ERROR_CODE = "invalid_user_info_response";
 
     private static final ParameterizedTypeReference<Map<String, Object>> PARAMETERIZED_RESPONSE_TYPE = new ParameterizedTypeReference<Map<String, Object>>() {};
 
     private RestOperations restOperations;
 
-    private CandidateService candidateService;
-
-    private ModelMapperService modelMapperService;
 
     @Autowired
-    public LinkedinOAuth2UserService(CandidateService candidateService, ModelMapperService modelMapperService, WebDriver webDriver) {
+    public LinkedinOAuth2UserService() {
         super();
-        this.candidateService = candidateService;
-        this.modelMapperService = modelMapperService;
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         this.restOperations = restTemplate;
@@ -80,20 +65,7 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
         jsonObject.put("lastName", getLastName(jsonObject));
         jsonObject.put("profilePicture", getProfilePicture(jsonObject));
         jsonObject.put("email", getEmail(emailJson));
-
-        Candidate candidate = createCandidateIfNoExist(jsonObject.toMap());
-        jsonObject.put("candidateId", candidate.getCandidateId());
-        return new DefaultOAuth2User(oAuth2User.getAuthorities(), jsonObject.toMap(), "candidateId");
-    }
-
-    private Candidate createCandidateIfNoExist(Map<String, Object> attributes){
-        Candidate candidate = this.candidateService.getCandidateByLinkedinId(attributes.get("linkedinId").toString());
-
-        if(candidate == null){
-            candidate = this.modelMapperService.forCreate().map(attributes, Candidate.class);
-            this.candidateService.createCandidate(candidate);
-        }
-        return candidate;
+        return new DefaultOAuth2User(oAuth2User.getAuthorities(), jsonObject.toMap(), "linkedinId");
     }
 
     private String getFirstName(JSONObject jsonObject) {

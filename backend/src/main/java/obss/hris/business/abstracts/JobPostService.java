@@ -9,7 +9,6 @@ import obss.hris.model.response.GetJobPostResponse;
 import java.util.List;
 
 public interface JobPostService {
-    List<GetJobPostResponse> getJobPosts();
 
     List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size);
 
@@ -18,8 +17,6 @@ public interface JobPostService {
     GetJobPostResponse getJobPostByIdForRequest(Long jobPostId);
 
     JobPost getJobPostById(Long jobPostId);
-
-    List<GetJobPostResponse> getJobPostsByCreator(String userName);
 
     List<GetJobPostResponse> getJobPostsByCreatorByPage(String userName, int page, int size);
 

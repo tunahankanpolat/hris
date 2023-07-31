@@ -18,6 +18,7 @@ public class JobApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long jobApplicationId;
 
+    @Enumerated(EnumType.STRING)
     private JobApplicationStatus status = JobApplicationStatus.PROCESSING;
 
     @Column(name = "application_time", nullable = false, updatable = false)

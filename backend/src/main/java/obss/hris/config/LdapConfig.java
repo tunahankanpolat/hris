@@ -1,39 +1,64 @@
 package obss.hris.config;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.data.ldap.repository.config.EnableLdapRepositories;
-import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.BaseLdapPathContextSource;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 
 @Configuration
-@PropertySource("classpath:application.properties")
-@ComponentScan(basePackages = {"obss.hris.*"})
-@Profile("default")
-@EnableLdapRepositories(basePackages = "tech.obss.**")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LdapConfig {
-    private Environment env;
+    @Value("${ldap.user.dn.pattern}")
+    private String userDnPatterns;
 
+    @Value("${ldap.url}")
+    private String ldapUrl;
+
+    @Value("${ldap.partitionSuffix}")
+    private String ldapPartitionSuffix;
+
+    @Value("${ldap.principal}")
+    private String ldapPrincipal;
+
+    @Value("${ldap.password}")
+    private String ldapPassword;
+
+    @Bean
+    LdapAuthoritiesPopulator authorities(BaseLdapPathContextSource contextSource) {
+        String groupSearchBase = "ou=groups";
+        DefaultLdapAuthoritiesPopulator authorities =
+                new DefaultLdapAuthoritiesPopulator(contextSource, groupSearchBase);
+        authorities.setGroupSearchFilter("member={0}");
+        return authorities;
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager(BaseLdapPathContextSource contextSource, LdapAuthoritiesPopulator authorities) {
+        LdapBindAuthenticationManagerFactory factory = new LdapBindAuthenticationManagerFactory(contextSource);
+        factory.setUserDnPatterns(userDnPatterns);
+        factory.setLdapAuthoritiesPopulator(authorities);
+        return factory.createAuthenticationManager();
+    }
     @Bean
     public LdapContextSource contextSource() {
         LdapContextSource contextSource = new LdapContextSource();
-        contextSource.setUrl(env.getRequiredProperty("ldap.url"));
-        contextSource.setBase(env.getRequiredProperty("ldap.partitionSuffix"));
-        contextSource.setUserDn(env.getRequiredProperty("ldap.principal"));
-        contextSource.setPassword(env.getRequiredProperty("ldap.password"));
+        contextSource.setUrl(ldapUrl);
+        contextSource.setBase(ldapPartitionSuffix);
+        contextSource.setUserDn(ldapPrincipal);
+        contextSource.setPassword(ldapPassword);
         return contextSource;
     }
 
     @Bean
-    public LdapTemplate ldapTemplate() {
-        return new LdapTemplate(contextSource());
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
-
-
 }

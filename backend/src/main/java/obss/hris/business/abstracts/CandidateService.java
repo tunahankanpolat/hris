@@ -2,12 +2,9 @@ package obss.hris.business.abstracts;
 
 import obss.hris.model.entity.Candidate;
 import obss.hris.model.response.GetCandidateResponse;
-
-import java.util.List;
+import org.springframework.security.core.Authentication;
 
 public interface CandidateService {
-
-    GetCandidateResponse getCandidateFromSecurityContext();
 
     Candidate createCandidate(Candidate candidate);
 
@@ -17,5 +14,7 @@ public interface CandidateService {
 
     Candidate getCandidateById(Long candidateId);
 
-    List<String> scrapeSkillsFromLinkedin(String linkedinUrl);
+    String createCandidateIfNoExistAndScrapeSkills(String linkedinUrl);
+
+    String getToken(Authentication authentication);
 }

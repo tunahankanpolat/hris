@@ -1,19 +1,15 @@
 package obss.hris.config;
 
+import lombok.AllArgsConstructor;
 import obss.hris.business.concretes.LinkedinOAuth2UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import obss.hris.core.util.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.ldap.core.support.BaseLdapPathContextSource;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
-import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
-import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -23,11 +19,8 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,41 +29,43 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class WebSecurityConfig {
-    @Autowired
-    LinkedinOAuth2UserService linkedinOAuth2UserService;
-    @Bean
-    LdapAuthoritiesPopulator authorities(BaseLdapPathContextSource contextSource) {
-        String groupSearchBase = "ou=groups";
-        DefaultLdapAuthoritiesPopulator authorities = new DefaultLdapAuthoritiesPopulator(contextSource, groupSearchBase);
-        authorities.setGroupSearchFilter("(member={0})");
-        return authorities;
-    }
+    private LinkedinOAuth2UserService linkedinOAuth2UserService;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private CorsConfigurationSource corsConfigurationSource;
 
-    @Bean
-    AuthenticationManager authenticationManager(BaseLdapPathContextSource contextSource, LdapAuthoritiesPopulator authorities) {
-        LdapBindAuthenticationManagerFactory factory = new LdapBindAuthenticationManagerFactory(contextSource);
-        factory.setUserSearchBase("ou=people");
-        factory.setUserSearchFilter("(uid={0})");
-        return factory.createAuthenticationManager();
-    }
+    private final String HR_ROLE = "HR_USER";
+    private final String CANDIDATE_ROLE = "OAUTH2_USER";
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-                .cors(withDefaults())
+                .cors().configurationSource(corsConfigurationSource).and()
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST,"login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/me").hasAuthority("OAUTH2_USER")
+                        .requestMatchers(HttpMethod.GET,"/login/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/hr/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/candidate/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/me").hasAuthority(CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/hr/v1/me").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.PUT,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.DELETE,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/jobApplications/v1/").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/jobApplications/v1/").hasAuthority(CANDIDATE_ROLE)
                         .anyRequest().authenticated()
-//                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token
                                 -> token.accessTokenResponseClient(linkedinTokenResponseClient()))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(this.linkedinOAuth2UserService))
-                ).formLogin(withDefaults());
+                                .successHandler(jwtAuthenticationSuccessHandler)
+                ).formLogin(withDefaults())
+                .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     private static DefaultAuthorizationCodeTokenResponseClient linkedinTokenResponseClient() {
@@ -91,13 +86,7 @@ public class WebSecurityConfig {
         return client;
     }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+
+
+
 }

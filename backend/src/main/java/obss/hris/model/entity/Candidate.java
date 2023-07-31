@@ -3,7 +3,10 @@ package obss.hris.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -14,7 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "candidates",
         indexes = {@Index(name = "candidate_linkedin_id_index", columnList = "linkedin_id")})
-
 public class Candidate {
     @Id
     @Column(name = "candidate_id")
@@ -40,7 +42,7 @@ public class Candidate {
 
     private String about;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> skills;
 
     @Column(name="is_banned", columnDefinition = "boolean default false")

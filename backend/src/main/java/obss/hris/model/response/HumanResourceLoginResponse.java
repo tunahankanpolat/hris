@@ -1,4 +1,4 @@
-package obss.hris.model.request;
+package obss.hris.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateJobApplicationRequest {
-    private Long candidateId;
-    private Long jobPostId;
+public class HumanResourceLoginResponse {
+    private String token;
 }

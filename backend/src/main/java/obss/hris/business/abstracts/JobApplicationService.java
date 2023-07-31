@@ -11,5 +11,4 @@ public interface JobApplicationService {
 
     List<GetCandidateJobApplicationResponse> getCandidateJobApplicationsByPage(Long candidateId, int page, int size);
 
-    List<GetCandidateJobApplicationResponse> getCandidateJobApplicationsByPage(int page, int size);
 }

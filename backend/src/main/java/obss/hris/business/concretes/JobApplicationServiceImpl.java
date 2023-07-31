@@ -14,8 +14,6 @@ import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.repository.JobApplicationRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,9 +32,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         if(jobPost == null) {
             throw new JobPostNotFoundException(jobApplication.getJobPostId());
         }
-        OAuth2User oauth2User = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long candidateId = Long.valueOf(oauth2User.getName());
-        Candidate candidate = candidateService.getCandidateById(candidateId);
+        Candidate candidate = candidateService.getCandidateById(jobApplication.getCandidateId());
         JobApplication newJobApplication = this.modelMapperService.forCreate().map(jobApplication, JobApplication.class);
         newJobApplication.setCandidate(candidate);
         newJobApplication.setJobPost(jobPost);
@@ -51,16 +47,5 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
         return jobApplications.stream().map(jobApplication ->
                 modelMapperService.forResponse().map(jobApplication, GetCandidateJobApplicationResponse.class)).toList();
-    }
-
-    @Override
-    public List<GetCandidateJobApplicationResponse> getCandidateJobApplicationsByPage(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        OAuth2User oauth2User = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long candidateId = Long.valueOf(oauth2User.getName());
-        List<JobApplication> jobApplications = jobApplicationRepository.findAllByCandidate_CandidateId(candidateId, pageable);
-
-        return jobApplications.stream().map(jobApplication ->
-                modelMapperService.forRequest().map(jobApplication, GetCandidateJobApplicationResponse.class)).toList();
     }
 }

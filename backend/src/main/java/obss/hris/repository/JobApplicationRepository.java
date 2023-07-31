@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface JobApplicationRepository extends JpaRepository<JobApplication,Long> {
+    List<JobApplication> findAllByCandidate_LinkedinId(String linkedinId, Pageable pageable);
     List<JobApplication> findAllByCandidate_CandidateId(Long candidateId, Pageable pageable);
 
 }

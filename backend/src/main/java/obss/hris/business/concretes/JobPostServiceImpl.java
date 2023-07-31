@@ -3,10 +3,8 @@ package obss.hris.business.concretes;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.HumanResourceService;
 import obss.hris.business.abstracts.JobPostService;
-import obss.hris.business.abstracts.LdapHumanResourceService;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.JobPostNotFoundException;
-import obss.hris.model.LdapPeople;
 import obss.hris.model.entity.HumanResource;
 import obss.hris.model.entity.JobApplication;
 import obss.hris.model.entity.JobPost;
@@ -30,16 +28,7 @@ import java.util.List;
 public class JobPostServiceImpl implements JobPostService {
     private JobPostRepository jobPostRepository;
     private ModelMapperService modelMapperService;
-
     private HumanResourceService humanResourceService;
-    private LdapHumanResourceService ldapHumanResourceService;
-
-    @Override
-    public List<GetJobPostResponse> getJobPosts() {
-        List<JobPost> jobPosts = jobPostRepository.findAll();
-        return jobPosts.stream().map(jobPost ->
-                modelMapperService.forResponse().map(jobPost, GetJobPostResponse.class)).toList();
-    }
 
     @Override
     public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size) {
@@ -87,14 +76,6 @@ public class JobPostServiceImpl implements JobPostService {
     }
 
     @Override
-    public List<GetJobPostResponse> getJobPostsByCreator(String userName) {
-        HumanResource humanResource = humanResourceService.getByUserName(userName);
-        List<JobPost> jobPosts = humanResource.getJobPosts();
-        return jobPosts.stream().map(jobPost ->
-                modelMapperService.forResponse().map(jobPost, GetJobPostResponse.class)).toList();
-    }
-
-    @Override
     public List<GetJobPostResponse> getJobPostsByCreatorByPage(String userName, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<JobPost> jobPosts = jobPostRepository.findAllByHumanResource_UserName(userName, pageable);
@@ -107,8 +88,7 @@ public class JobPostServiceImpl implements JobPostService {
     public JobPost createJobPost(CreateJobPostRequest jobPost) {
         JobPost newJobPost = modelMapperService.forRequest().map(jobPost, JobPost.class);
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        HumanResource humanResource = createHumanResourceIfNoExist(userName);
-
+        HumanResource humanResource = humanResourceService.getByUserName(userName);
         if (jobPost.getActivationTime().compareTo(new Date()) <= 0) {
             newJobPost.setActive(true);
         }
@@ -118,25 +98,15 @@ public class JobPostServiceImpl implements JobPostService {
         return newJobPost;
     }
 
-    private HumanResource createHumanResourceIfNoExist(String userName) {
-        HumanResource humanResource = humanResourceService.getByUserName(userName);
-        if (humanResource == null) {
-            LdapPeople ldapPeople = ldapHumanResourceService.getByUserName(userName);
-            humanResource = modelMapperService.forCreate().map(ldapPeople, HumanResource.class);
-            humanResource = humanResourceService.createHumanResource(humanResource);
-        }
-        return humanResource;
-    }
-
     @Override
     public JobPost updateJobPost(UpdateJobPostRequest jobPost) {
         JobPost existingJobPost = jobPostRepository.findById(jobPost.getJobPostId()).orElse(null);
         if (existingJobPost == null) {
             throw new JobPostNotFoundException(jobPost.getJobPostId());
         }
-        JobPost updatedJobPost = modelMapperService.forRequest().map(jobPost, JobPost.class);
-        jobPostRepository.save(updatedJobPost);
-        return updatedJobPost;
+        existingJobPost.updateJobPost(jobPost);
+        jobPostRepository.save(existingJobPost);
+        return existingJobPost;
     }
 
     @Override

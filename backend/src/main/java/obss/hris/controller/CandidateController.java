@@ -6,8 +6,10 @@ import obss.hris.business.abstracts.JobApplicationService;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetCandidateResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
@@ -19,23 +21,31 @@ public class CandidateController {
     private JobApplicationService jobApplicationService;
 
     @GetMapping("me")
-    public ResponseEntity<GetCandidateResponse> getCandidateFromSecurityContext() {
-        return ResponseEntity.ok(candidateService.getCandidateFromSecurityContext());
+    public ResponseEntity<GetCandidateResponse> getCandidate(@AuthenticationPrincipal OAuth2User oauth2User) {
+        return ResponseEntity.ok(candidateService.getCandidateByIdForRequest(oauth2User.getAttribute("candidateId")));
     }
+
     @GetMapping("{candidateId}")
     public ResponseEntity<GetCandidateResponse> getCandidateById(@PathVariable Long candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateByIdForRequest(candidateId));
     }
 
-    @GetMapping("skills/scrape")
-    public ResponseEntity<List<String>> scrapeSkillsFromLinkedin(@RequestParam String linkedinUrl) {
-        return ResponseEntity.ok(candidateService.scrapeSkillsFromLinkedin(linkedinUrl));
+    @GetMapping("login")
+    public ResponseEntity<String> createCandidateIfNoExistAndScrapeSkills(@RequestParam String linkedinUrl) {
+        return ResponseEntity.ok(candidateService.createCandidateIfNoExistAndScrapeSkills(linkedinUrl));
+    }
+
+    @GetMapping("token")
+    public ResponseEntity<String> getToken(Authentication authentication) {
+        return ResponseEntity.ok(candidateService.getToken(authentication));
     }
 
     @GetMapping("me/jobApplications/{page}/{size}")
     public ResponseEntity<List<GetCandidateJobApplicationResponse>> getCandidateJobApplicationsByPage
             (@PathVariable int page,
-             @PathVariable int size) {
-        return ResponseEntity.ok(jobApplicationService.getCandidateJobApplicationsByPage(page,size));
+             @PathVariable int size,
+             @AuthenticationPrincipal OAuth2User oauth2User) {
+        return ResponseEntity.ok(jobApplicationService.getCandidateJobApplicationsByPage
+                (oauth2User.getAttribute("candidateId"), page,size));
     }
 }
