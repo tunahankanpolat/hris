@@ -18,5 +18,5 @@ public class UpdateJobPostRequest {
     private Date closureTime;
     private String company;
     private String location;
-    private List<String> skills;
+    private List<String> requiredSkills;
 }

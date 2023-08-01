@@ -49,13 +49,15 @@ public class HumanResourceServiceImpl implements HumanResourceService {
     public HumanResourceLoginResponse login(HumanResourceLoginRequest loginRequest) {
         String userName = loginRequest.getUserName();
         String password = loginRequest.getPassword();
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
         final LdapPeople ldapPeople = ldapHumanResourceService.getByUserName(userName);
         if(ldapPeople == null) {
             throw new HumanResourceNotFoundException();
         }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
         createHumanResourceIfNoExist(ldapPeople);
-        return  new HumanResourceLoginResponse(jwtUtils.generateToken(ldapPeople));
+        HumanResourceLoginResponse loginResponse = modelMapperService.forResponse().map(ldapPeople, HumanResourceLoginResponse.class);
+        loginResponse.setToken(jwtUtils.generateToken(ldapPeople));
+        return  loginResponse;
     }
 
     private void createHumanResourceIfNoExist(LdapPeople ldapPeople) {

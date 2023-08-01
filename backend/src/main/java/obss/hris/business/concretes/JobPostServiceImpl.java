@@ -33,7 +33,12 @@ public class JobPostServiceImpl implements JobPostService {
     @Override
     public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size) {
         JobPost jobPost = this.getJobPostById(jobPostId);
+        Pageable pageable = PageRequest.of(page, size);
         List<JobApplication> jobApplications = jobPost.getJobApplications();
+        int totalApplications = jobApplications.size();
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, totalApplications);
+        List<JobApplication> pagedApplications = jobApplications.subList(startIndex, endIndex);
 
         TypeMap<JobApplication, GetJobPostApplicationResponse> typeMap = this.modelMapperService.forResponse().getTypeMap(JobApplication.class, GetJobPostApplicationResponse.class);
         if(typeMap == null){
@@ -44,7 +49,7 @@ public class JobPostServiceImpl implements JobPostService {
             );
         }
 
-        return jobApplications.stream().map(jobApplication ->
+        return pagedApplications.stream().map(jobApplication ->
                 modelMapperService.forResponse().map(jobApplication, GetJobPostApplicationResponse.class)).toList();
     }
 

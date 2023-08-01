@@ -39,6 +39,7 @@ public class JobPost {
 
     @NotNull
     @NotBlank
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @NotNull
@@ -60,7 +61,7 @@ public class JobPost {
     private List<JobApplication> jobApplications;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> skills;
+    private List<String> requiredSkills;
 
     public void updateJobPost(UpdateJobPostRequest updateJobPostRequest){
         setCompany(updateJobPostRequest.getCompany());
@@ -69,6 +70,6 @@ public class JobPost {
         setDescription(updateJobPostRequest.getDescription());
         setActivationTime(updateJobPostRequest.getActivationTime());
         setClosureTime(updateJobPostRequest.getClosureTime());
-        setSkills(updateJobPostRequest.getSkills());
+        setRequiredSkills(updateJobPostRequest.getRequiredSkills());
     }
 }
