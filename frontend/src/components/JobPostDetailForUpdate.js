@@ -1,27 +1,80 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
+import JobPostService from "../services/jobPostService";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function JobPostDetailForUpdate(props) {
-  const [isTitleEditing, setTitleEditing] = useState(false);
-  const [title, setTitle] = useState("İş Başlığı");
-
-  const [isCompanyEditing, setCompanyEditing] = useState(false);
-  const [company, setCompany] = useState("Obss Teknoloji Anonim Şirketi");
-
-  const [isLocationEditing, setLocationEditing] = useState(false);
-  const [location, setLocation] = useState("Ankara");
-
-  const [isSkillsEditing, setSkillsEditing] = useState(false);
-  const [skills, setSkills] = useState("Spring, Backend, Frontend, AI");
-
-  const [isDescriptionEditing, setDescriptionEditing] = useState(false);
-  const [description, setDescription] = useState(
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, quibusdam. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum. Quisquam, voluptatum."
+  const humanResource = useSelector(
+    (state) => state.humanResource.humanResource
   );
+  const navigate = useNavigate();
+  const [isTitleEditing, setTitleEditing] = useState(false);
+  const [isLocationEditing, setLocationEditing] = useState(false);
+  const [isDescriptionEditing, setDescriptionEditing] = useState(false);
+  const [isCompanyEditing, setCompanyEditing] = useState(false);
+
+  const [company, setCompany] = useState();
+  const [title, setTitle] = useState();
+  const [location, setLocation] = useState();
+  const [description, setDescription] = useState();
+  const [skills, setSkills] = useState();
+  const [newSkill, setNewSkill] = useState("");
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
+  useEffect(() => {
+    setTitle(props.title);
+    setCompany(props.company);
+    setLocation(props.location);
+    setSkills(props.requiredSkills);
+    setDescription(props.description);
+  }, [props]);
+
+  const handleSave = async (event) => {
+    event.preventDefault();
+    let jobPost = {
+      jobPostId: props.jobPostId,
+      title: title,
+      company: company,
+      location: location,
+      requiredSkills: skills,
+      description: description,
+      activationTime: props.activationTime,
+      closureTime: props.closureTime,
+      requiredSkills: skills,
+    };
+    let jobPostService = new JobPostService();
+    await jobPostService
+      .updateJobPost(humanResource.token, jobPost)
+      .then((result) => {
+        debugger;
+        props.onUpdate(jobPost);
+        toast.success(result.data);
+      })
+      .catch((err) => {
+        toast.error(err.response.data.error_message);
+      });
+  };
+
+  const handleDelete = async (event) => {
+    event.preventDefault();
+    let jobPost = { jobPostId: props.jobPostId };
+    let jobPostService = new JobPostService();
+    await jobPostService
+      .deleteJobPost(humanResource.token, props.jobPostId)
+      .then((result) => {
+        props.onDelete(jobPost);
+        toast.success(result.data);
+      })
+      .catch((err) => {
+        toast.error(err.response.data.error_message);
+      });
+  };
 
   const handleTitleEdit = () => {
     if (isTitleEditing) {
@@ -44,11 +97,10 @@ export default function JobPostDetailForUpdate(props) {
     setLocationEditing(!isLocationEditing);
   };
 
-  const handleSkillsEdit = () => {
-    if (isSkillsEditing) {
-      setSkills(document.getElementById("skills-input").value);
-    }
-    setSkillsEditing(!isSkillsEditing);
+  const handleAddSkill = () => {
+    if (newSkill.trim() === "") return;
+    setSkills([...skills, newSkill.trim()]);
+    setNewSkill("");
   };
 
   const handleDescriptionEdit = () => {
@@ -57,21 +109,19 @@ export default function JobPostDetailForUpdate(props) {
     }
     setDescriptionEditing(!isDescriptionEditing);
   };
+  const handleRemoveSkill = (skill) => {
+    const updatedSkills = skills.filter((s) => s !== skill);
+    setSkills(updatedSkills);
+  };
 
-  const handleSave = () => {
-    // Perform any save actions here (e.g., API calls, etc.)
-    // For simplicity, we'll just log the values for now
-    console.log("Title:", title);
-    console.log("Company:", company);
-    console.log("Location:", location);
-    console.log("Skills:", skills);
-    console.log("Description:", description);
+  const toggleDropdown = () => {
+    setDropdownVisible(!dropdownVisible);
   };
 
   return (
     <div className="w-full h-full flex flex-col px-7 gap-12">
       <div className="flex justify-between w-full">
-        <h2 className="text-xl font-bold w-full">
+        <h2 className="text-xl font-bold text-obss-blue w-full cursor-pointer">
           {isTitleEditing ? (
             <input
               type="text"
@@ -80,17 +130,54 @@ export default function JobPostDetailForUpdate(props) {
               id="title-input"
             />
           ) : (
-            title
+            <div>
+              <button
+                id="dropdownDefaultButton"
+                onClick={toggleDropdown}
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 h-10"
+              >
+                {title}
+              </button>
+              <div
+                id="dropdown"
+                className={`${
+                  dropdownVisible ? "" : "hidden"
+                } z-20 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 absolute`}
+              >
+                <ul
+                  className="py-2 text-sm text-gray-700 dark:text-gray-200 text-center"
+                  aria-labelledby="dropdownDefaultButton"
+                >
+                  <li>
+                    <button
+                    onClick={()=>navigate(`/human-resource/job-posts/${props.jobPostId}/job-applications`)}
+                      className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    >
+                      Başvuraları Gör
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={handleDelete}
+                      className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    >
+                      İlanı Sil
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
           )}
         </h2>
+
         {!isTitleEditing ? (
           <EditIcon
-            className="text-obss-gray cursor-pointer"
+            className="text-obss-blue cursor-pointer"
             onClick={handleTitleEdit}
           />
         ) : (
           <CheckIcon
-            className="text-obss-gray cursor-pointer"
+            className="text-obss-blue cursor-pointer border rounded bg-job-posts-background"
             onClick={handleTitleEdit}
           />
         )}
@@ -112,12 +199,12 @@ export default function JobPostDetailForUpdate(props) {
           </div>
           {!isCompanyEditing ? (
             <EditIcon
-              className="text-obss-gray cursor-pointer"
+              className="text-obss-blue cursor-pointer"
               onClick={handleCompanyEdit}
             />
           ) : (
             <CheckIcon
-              className="text-obss-gray cursor-pointer"
+              className="text-obss-blue cursor-pointer border rounded bg-job-posts-background"
               onClick={handleCompanyEdit}
             />
           )}
@@ -138,12 +225,12 @@ export default function JobPostDetailForUpdate(props) {
           </div>
           {!isLocationEditing ? (
             <EditIcon
-              className="text-obss-gray cursor-pointer"
+              className="text-obss-blue cursor-pointer"
               onClick={handleLocationEdit}
             />
           ) : (
             <CheckIcon
-              className="text-obss-gray cursor-pointer"
+              className="text-obss-blue cursor-pointer border rounded bg-job-posts-background"
               onClick={handleLocationEdit}
             />
           )}
@@ -152,32 +239,49 @@ export default function JobPostDetailForUpdate(props) {
 
       <div className="flex justify-between">
         <div className="w-full">
-          <h4 className="text-lg mb-2">
-            <ChecklistIcon className="mr-3" />
-            Gereken Özellikler
-          </h4>
-          {isSkillsEditing ? (
-            <input
-              type="text"
-              defaultValue={skills}
-              className="border rounded focus:outline-none w-full"
-              id="skills-input"
-            />
-          ) : (
-            <p>{skills}</p>
-          )}
+          <div className="flex justify-between text-lg mb-2">
+            <div>
+              <ChecklistIcon className="mr-3" />
+              Gereken Özellikler
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="text"
+                id="requiredSkill"
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                className="border rounded py-2 px-3 text-gray-700"
+              />
+              <button
+                type="button"
+                onClick={handleAddSkill}
+                className="bg-obss-blue text-white py-2 px-4 rounded ml-2"
+              >
+                Ekle
+              </button>
+            </div>
+          </div>
+
+          <div>
+            {skills &&
+              skills.map((skill, index) => (
+                <div
+                  key={index}
+                  className="inline-block bg-gray-200 text-gray-800 rounded px-2 py-1 m-1"
+                >
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSkill(skill)}
+                    className="ml-2 text-red-600 font-bold"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+          </div>
         </div>
-        {!isSkillsEditing ? (
-          <EditIcon
-            className="text-obss-gray cursor-pointer"
-            onClick={handleSkillsEdit}
-          />
-        ) : (
-          <CheckIcon
-            className="text-obss-gray cursor-pointer"
-            onClick={handleSkillsEdit}
-          />
-        )}
       </div>
 
       <div className="flex justify-between">
@@ -195,12 +299,12 @@ export default function JobPostDetailForUpdate(props) {
         </div>
         {!isDescriptionEditing ? (
           <EditIcon
-            className="text-obss-gray cursor-pointer"
+            className="text-obss-blue cursor-pointer"
             onClick={handleDescriptionEdit}
           />
         ) : (
           <CheckIcon
-            className="text-obss-gray cursor-pointer"
+            className="text-obss-blue cursor-pointer border rounded bg-job-posts-background"
             onClick={handleDescriptionEdit}
           />
         )}

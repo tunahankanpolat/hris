@@ -2,11 +2,9 @@ import React from "react";
 import SyncIcon from "@mui/icons-material/Sync";
 import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
 import BlockIcon from "@mui/icons-material/Block";
-import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 
 export default function CandidateJobApplicationCard(props) {
   return (
-    //tıklandığında background color
     <div className="cursor-pointer w-full h-32 p-3 flex flex-col pl-12 pr-8 bg-white active:bg-blue-100 transition-colors">
       <hr className="border-gray-300 w-full mb-5" />
       <div className="flex justify-between">
@@ -20,15 +18,6 @@ export default function CandidateJobApplicationCard(props) {
         </div>
         <div className="flex flex-col justify-center items-center">
           {(() => {
-            // if (props.state === "WAITING")
-            //   return (
-            //     <div className=" flex justify-between items-center item gap-3">
-            //       <HourglassTopIcon className="text-obss-gray" />
-            //       <div className="text-xs text-obss-gray whitespace-break-spaces ">
-            //         Başvuru{"\n"}İletildi
-            //       </div>
-            //     </div>
-            //   );
             if (props.state === "PROCESSING")
               return (
                 <div className=" flex justify-between items-center item gap-3">

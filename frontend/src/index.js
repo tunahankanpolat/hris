@@ -3,16 +3,27 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import CandidateJobApplication from "./pages/CandidateJobApplication";
-import HumanResourceJobPosts from "./pages/HumanResourceJobPosts";
-import CandidateProfile from "./pages/CandidateProfile";
-import JobPostApplications from "./pages/JobPostApplications";
+import { Provider } from "react-redux";
+import store from "./store";
+import { ToastContainer } from "react-toastify";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <BrowserRouter>
-    <JobPostApplications />
-  </BrowserRouter>
+  <Provider store={store}>
+    <BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <App />
+    </BrowserRouter>
+  </Provider>
 );

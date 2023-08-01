@@ -3,6 +3,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  console.log(totalPages);
   const pageNumbers = Array.from(
     { length: totalPages },
     (_, index) => index + 1

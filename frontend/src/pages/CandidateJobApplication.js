@@ -1,5 +1,5 @@
 import React from "react";
-import NavBar from "../layouts/NavBar";
+import NavBar from "../components/LoginNavBar";
 import CandidateJobApplicationCard from "../components/CandidateJobApplicationCard";
 import JobPostDetail from "../components/JobPostDetail";
 import Pagination from "../components/Pagination";

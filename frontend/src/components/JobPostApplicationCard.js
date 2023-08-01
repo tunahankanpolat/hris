@@ -16,14 +16,14 @@ export default function JobPostApplicationCard(props) {
     setProfileDropdownVisible(!profileDropdownVisible);
   };
   return (
-    //tıklandığında background color
     <div className="w-full h-32 p-3 flex flex-col pl-12 pr-8 bg-white">
       <hr className="border-gray-300 w-full mb-5" />
       <div className="flex justify-between w-full h-full">
         <div className="flex justify-between h-full">
           <img
-            className="flex items-center justify-center h-full rounded-full mr-5"
-            src="https://media.licdn.com/dms/image/D4D03AQGdU0AzoZjalA/profile-displayphoto-shrink_800_800/0/1678642073353?e=1695859200&v=beta&t=RXHdCRMGalkkip8l5tLN2i-zXLEPiYfCzjU-woMZDk8"
+            className="flex items-center justify-center h-full rounded-full mr-5 object-center object-cover"
+            src={props.profilePicture?props.profilePicture:process.env.REACT_APP_DEFAULT_PROFILE_AVATAR_URL}
+            alt="User Avatar" 
           />
           <div className="flex flex-col">
             <div className="relative">
@@ -32,7 +32,7 @@ export default function JobPostApplicationCard(props) {
                 className="text-xl font-bold text-obss-blue"
                 onClick={toggleProfileDropdown}
               >
-                Başvuranın Adı ve Soyadı
+                {props.firstName} {" " + props.lastName}
               </button>
               <div
                 id="profileDropdown"
@@ -75,15 +75,6 @@ export default function JobPostApplicationCard(props) {
             <ul>
               <li className="text-s text-obss-gray">
                 {(() => {
-                  // if (props.state === "WAITING")
-                  //   return (
-                  //     <div className=" flex justify-between items-center item gap-3">
-                  //       <HourglassTopIcon className="text-obss-gray cursor-pointer" />
-                  //       <div className="text-xs text-obss-gray  ">
-                  //         Başvuru İletildi
-                  //       </div>
-                  //     </div>
-                  //   );
                   if (props.state === "PROCESSING")
                     return (
                       <div className=" flex justify-between items-center item gap-3">
@@ -116,7 +107,7 @@ export default function JobPostApplicationCard(props) {
                     );
                 })()}
               </li>
-              <li className="text-xs text-obss-gray pt-4">Başvurma Tarihi</li>
+              <li className="text-xs text-obss-gray pt-4">Başvurma Tarihi: {props.applicationTime}</li>
             </ul>
           </div>
         </div>
