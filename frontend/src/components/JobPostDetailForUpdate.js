@@ -8,6 +8,8 @@ import JobPostService from "../services/jobPostService";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import ToggleOnIcon from "@mui/icons-material/ToggleOn";
+import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 
 export default function JobPostDetailForUpdate(props) {
   const humanResource = useSelector(
@@ -24,6 +26,7 @@ export default function JobPostDetailForUpdate(props) {
   const [location, setLocation] = useState();
   const [description, setDescription] = useState();
   const [skills, setSkills] = useState();
+  const [active, setActive] = useState();
   const [newSkill, setNewSkill] = useState("");
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -33,6 +36,8 @@ export default function JobPostDetailForUpdate(props) {
     setLocation(props.location);
     setSkills(props.requiredSkills);
     setDescription(props.description);
+    setActive(props.active);
+    debugger;
   }, [props]);
 
   const handleSave = async (event) => {
@@ -47,12 +52,12 @@ export default function JobPostDetailForUpdate(props) {
       activationTime: props.activationTime,
       closureTime: props.closureTime,
       requiredSkills: skills,
+      active: active,
     };
     let jobPostService = new JobPostService();
     await jobPostService
       .updateJobPost(humanResource.token, jobPost)
       .then((result) => {
-        debugger;
         props.onUpdate(jobPost);
         toast.success(result.data);
       })
@@ -117,10 +122,23 @@ export default function JobPostDetailForUpdate(props) {
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
-
+  debugger;
   return (
     <div className="w-full h-full flex flex-col px-7 gap-12">
-      <div className="flex justify-between w-full">
+      <div className="flex justify-between w-full gap-5">
+        {active ? (
+          <ToggleOnIcon
+            className="cursor-pointer"
+            onClick={() => setActive(false)}
+            style={{ width: 40, height: 40, color: "#0a66c2" }}
+          />
+        ) : (
+          <ToggleOffIcon
+            className="cursor-pointer"
+            onClick={() => setActive(true)}
+            style={{ width: 40, height: 40, color: "gray" }}
+          />
+        )}
         <h2 className="text-xl font-bold text-obss-blue w-full cursor-pointer">
           {isTitleEditing ? (
             <input
@@ -150,7 +168,11 @@ export default function JobPostDetailForUpdate(props) {
                 >
                   <li>
                     <button
-                    onClick={()=>navigate(`/human-resource/job-posts/${props.jobPostId}/job-applications`)}
+                      onClick={() =>
+                        navigate(
+                          `/human-resource/job-posts/${props.jobPostId}/job-applications`
+                        )
+                      }
                       className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Başvuraları Gör
@@ -181,6 +203,12 @@ export default function JobPostDetailForUpdate(props) {
             onClick={handleTitleEdit}
           />
         )}
+      </div>
+      <div className="flex flex-col justify-start">
+        <ul className="pl-5 space-y-3 text-gray-600 list-disc marker:text-[#0a66c2]">
+          <li>Aktivasyon Zamanı : {props.activationTime}</li>
+          <li>Kapanma Zamanı : {props.closureTime}</li>
+        </ul>
       </div>
       <div>
         <div className="flex justify-between">

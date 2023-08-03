@@ -1,21 +1,31 @@
 package obss.hris.business.concretes;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.HumanResourceService;
+import obss.hris.business.abstracts.JobApplicationService;
+import obss.hris.business.abstracts.JobPostService;
 import obss.hris.business.abstracts.LdapHumanResourceService;
 import obss.hris.core.util.jwt.JwtUtils;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.HumanResourceNotFoundException;
 import obss.hris.model.LdapPeople;
 import obss.hris.model.entity.HumanResource;
+import obss.hris.model.entity.JobApplicationStatus;
+import obss.hris.model.entity.JobPost;
+import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.HumanResourceLoginRequest;
-import obss.hris.model.response.GetHumanResourceResponse;
-import obss.hris.model.response.HumanResourceLoginResponse;
+import obss.hris.model.response.*;
 import obss.hris.repository.HumanResourceRepository;
 import org.modelmapper.TypeMap;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 
 @Service
@@ -26,6 +36,7 @@ public class HumanResourceServiceImpl implements HumanResourceService {
     private ModelMapperService modelMapperService;
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
+    private JobApplicationService jobApplicationService;
 
     @Override
     public HumanResource createHumanResource(HumanResource humanResource) {
@@ -33,11 +44,15 @@ public class HumanResourceServiceImpl implements HumanResourceService {
     }
     @Override
     public HumanResource getByUserName(String userName) {
-        return humanResourceRepository.findByUserName(userName);
+        HumanResource humanResource = humanResourceRepository.findByUserName(userName);
+        if (humanResource == null) {
+            throw new HumanResourceNotFoundException();
+        }
+        return humanResource;
     }
 
     @Override
-    public GetHumanResourceResponse getByLdapUserName(String userName) {
+    public GetHumanResourceResponse getByUserNameForRequest(String userName) {
         HumanResource humanResource = humanResourceRepository.findByUserName(userName);
         if(humanResource == null){
             throw new HumanResourceNotFoundException();
@@ -46,7 +61,7 @@ public class HumanResourceServiceImpl implements HumanResourceService {
     }
 
     @Override
-    public HumanResourceLoginResponse login(HumanResourceLoginRequest loginRequest) {
+    public LoginResponse login(HumanResourceLoginRequest loginRequest, HttpServletRequest request) {
         String userName = loginRequest.getUserName();
         String password = loginRequest.getPassword();
         final LdapPeople ldapPeople = ldapHumanResourceService.getByUserName(userName);
@@ -55,9 +70,29 @@ public class HumanResourceServiceImpl implements HumanResourceService {
         }
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
         createHumanResourceIfNoExist(ldapPeople);
-        HumanResourceLoginResponse loginResponse = modelMapperService.forResponse().map(ldapPeople, HumanResourceLoginResponse.class);
-        loginResponse.setToken(jwtUtils.generateToken(ldapPeople));
-        return  loginResponse;
+        String token = jwtUtils.generateToken(ldapPeople);
+        LoginResponse loginResponse = new LoginResponse(token);
+        HttpSession session = request.getSession(false);
+        if(session != null) {
+            session.invalidate(); // Session'ı sonlandır
+        }
+        return loginResponse;
+    }
+    @Override
+    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus) {
+        return jobApplicationService.getJobPostApplicationsByPage(jobPostId, page, size, jobApplicationStatus);
+    }
+
+    @Override
+    public List<GetJobPostResponse> getJobPostsByPage(String userName, int page, int size) {
+        HumanResource humanResource = getByUserName(userName);
+        List<JobPost> jobPosts = humanResource.getJobPosts();
+        int totalApplications = jobPosts.size();
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, totalApplications);
+        List<JobPost> pagedApplications = jobPosts.subList(startIndex, endIndex);
+        return pagedApplications.stream().map(jobPost ->
+                modelMapperService.forResponse().map(jobPost, GetJobPostResponse.class)).toList();
     }
 
     private void createHumanResourceIfNoExist(LdapPeople ldapPeople) {

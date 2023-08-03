@@ -9,7 +9,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetCandidateResponse {
+public class CandidateLoginResponse {
+    private Long candidateId;
+    private String token;
     private String firstName;
     private String lastName;
     private String email;

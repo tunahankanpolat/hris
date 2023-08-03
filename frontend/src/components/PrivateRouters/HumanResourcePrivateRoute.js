@@ -1,9 +1,10 @@
 import { Navigate, useLocation } from "react-router-dom";
-export default function PrivateRoute({children}) {
-  const user = false;
+import { useSelector } from "react-redux";
+export default function HumanResourcePrivateRoute({children}) {
+  const humanResource = useSelector((state) => state.humanResource.humanResource);
   const location = useLocation();
-
-  if (!user) {
+  
+  if (!humanResource) {
     return (
       <Navigate
         to="/login"

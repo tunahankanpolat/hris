@@ -1,20 +1,21 @@
 package obss.hris.business.concretes;
 
-import obss.hris.business.abstracts.CandidateService;
-import obss.hris.business.abstracts.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import obss.hris.business.abstracts.*;
 import obss.hris.core.util.jwt.JwtUtils;
 import obss.hris.core.util.mapper.ModelMapperService;
+import obss.hris.exception.CandidateBannedException;
 import obss.hris.exception.CandidateNotFoundException;
-import obss.hris.model.entity.Candidate;
-import obss.hris.model.response.CandidateScrapeResponse;
-import obss.hris.model.response.GetCandidateResponse;
+import obss.hris.exception.JobPostNotFoundException;
+import obss.hris.model.entity.*;
+import obss.hris.model.response.*;
 import obss.hris.repository.CandidateRepository;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -33,6 +34,7 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     private CandidateRepository candidateRepository;
     private JwtUtils jwtUtils;
     private WebDriver webDriver;
+    private JobApplicationService jobApplicationService;
     @Value("${linkedin.login-url}")
     private String linkedinLoginUrl;
 
@@ -42,11 +44,12 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     @Value("${linkedin.account-password}")
     private String linkedinAccountPassword;
 
-    public CandidateServiceImpl(ModelMapperService modelMapperService, CandidateRepository candidateRepository, JwtUtils jwtUtils, WebDriver webDriver) {
+    public CandidateServiceImpl(ModelMapperService modelMapperService, CandidateRepository candidateRepository, JwtUtils jwtUtils, WebDriver webDriver, JobApplicationService jobApplicationService) {
         this.modelMapperService = modelMapperService;
         this.candidateRepository = candidateRepository;
         this.jwtUtils = jwtUtils;
         this.webDriver = webDriver;
+        this.jobApplicationService = jobApplicationService;
     }
 
     @Override
@@ -61,27 +64,22 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
 
     @Override
     public GetCandidateResponse getCandidateByIdForRequest(Long candidateId) {
-        Candidate candidate = candidateRepository.findById(candidateId).orElse(null);
-        if (candidate == null) {
-            throw new CandidateNotFoundException();
-        }
+        Candidate candidate = getCandidateById(candidateId);
         return this.modelMapperService.forResponse().map(candidate, GetCandidateResponse.class);
     }
 
     @Override
     public Candidate getCandidateById(Long candidateId) {
-        Candidate candidate = candidateRepository.findById(candidateId).orElse(null);
-        if (candidate == null) {
-            throw new CandidateNotFoundException();
-        }
+        Candidate candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new CandidateNotFoundException());
         return candidate;
     }
 
     @Override
-    public String createCandidateIfNoExistAndScrapeSkills(String linkedinUrl) {
+    public LoginResponse scrapeSkillsAndCreateCandidateIfNotExist(String linkedinUrl, HttpServletRequest request) {
         OAuth2User oauth2User = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String,Object> attributes = oauth2User.getAttributes();
-        Candidate candidate = this.candidateRepository.findByLinkedinId(attributes.get("linkedinId").toString());
+        Candidate candidate = this.candidateRepository.findByLinkedinId(oauth2User.getName());
         if(candidate == null){
             candidate = this.modelMapperService.forCreate().map(attributes, Candidate.class);
             CandidateScrapeResponse scrapeResponse = getUserDataUsingScraping(linkedinUrl);
@@ -89,13 +87,66 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
             candidate.setAbout(scrapeResponse.getAbout());
             candidateRepository.save(candidate);
         }
-        return jwtUtils.generateToken(SecurityContextHolder.getContext().getAuthentication());
+        return getCandidateLoginResponse(request);
     }
 
     @Override
-    public String getToken(Authentication authentication) {
-        return jwtUtils.generateToken(authentication);
+    public LoginResponse login(HttpServletRequest request) {
+        OAuth2User oauth2User = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Candidate candidate = this.candidateRepository.findByLinkedinId(oauth2User.getName());
+        if(candidate == null){
+            throw new CandidateNotFoundException();
+        }
+        return getCandidateLoginResponse(request);
     }
+
+    private LoginResponse getCandidateLoginResponse(HttpServletRequest request) {
+        String token = jwtUtils.generateToken(SecurityContextHolder.getContext().getAuthentication());
+        LoginResponse loginResponse = new LoginResponse(token);
+        HttpSession session = request.getSession(false);
+        if(session != null) {
+            session.invalidate(); // Session'ı sonlandır
+        }
+        return loginResponse;
+    }
+
+    @Override
+    public void setCandidateAsBanned(Candidate candidate) {
+        candidate.setBanned(true);
+        candidateRepository.save(candidate);
+    }
+
+    @Override
+    public List<GetCandidateJobApplicationResponse> getCandidateJobApplicationsByPage(Long candidateId, int page, int size) {
+        return jobApplicationService.getCandidateJobApplicationsByPage(candidateId, page, size);
+    }
+
+//    @Override
+//    public JobApplication createJobApplication(CreateJobApplicationRequest jobApplication) {
+//        Candidate candidate = candidateService.getCandidateById(jobApplication.getCandidateId());
+//        if(candidate.isBanned()){
+//            throw new CandidateNotFoundException();
+//        }
+//        JobPost jobPost = jobPostService.getJobPostById(jobApplication.getJobPostId());
+//        if(jobPost == null) {
+//            throw new JobPostNotFoundException(jobApplication.getJobPostId());
+//        }
+//        JobApplication newJobApplication = this.modelMapperService.forCreate().map(jobApplication, JobApplication.class);
+//        newJobApplication.setCandidate(candidate);
+//        newJobApplication.setJobPost(jobPost);
+//        this.jobApplicationRepository.save(newJobApplication);
+//        return newJobApplication;
+//    }
+//    private void banCandidateAndRejectJopApplications(Candidate candidate, String reason) {
+//        List<JobApplication> jobApplications = jobApplicationService.getCandidateJobApplications(candidate.getCandidateId());
+//        jobApplicationService.batchUpdateStatus(jobApplications, JobApplicationStatus.REJECTED);
+//        Blacklist blacklist = new Blacklist();
+//        blacklist.setCandidate(candidate);
+//        blacklist.setReason(reason);
+//        blacklistRepository.save(blacklist);
+//    }
+
+
 
     private CandidateScrapeResponse getUserDataUsingScraping(String linkedinUrl){
         webDriver.get(linkedinLoginUrl);

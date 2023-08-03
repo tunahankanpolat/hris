@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface JobPostRepository extends JpaRepository<JobPost,Long> {
     List<JobPost> findAllByHumanResource_UserName(String userName, Pageable pageable);
+    List<JobPost> findAllByIsActiveTrue(Pageable pageable);
+
+
 }

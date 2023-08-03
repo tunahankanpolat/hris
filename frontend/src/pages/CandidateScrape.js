@@ -3,22 +3,32 @@ import { Circles } from "react-loader-spinner";
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CandidateService from "../services/candidateService";
+import { useDispatch } from "react-redux";
+import { setCandidate } from "../store/candidate";
+import { toast } from "react-toastify";
 axios.defaults.withCredentials = true;
-const CandidateScrape = (window) => {
+
+const CandidateScrape = () => {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const response = await axios
-      .get("http://localhost:8080/api/candidate/v1/login?linkedinUrl=" + url)
+    let candidateService = new CandidateService();
+    candidateService
+      .scrapeSkills(url)
       .then((res) => {
         setLoading(false);
+        dispatch(setCandidate(res.data));
         navigate("/candidate/auth/success");
       })
       .catch((err) => {
         setLoading(false);
+        toast.error(err.response.data.error_message);
       });
   };
 
@@ -28,7 +38,7 @@ const CandidateScrape = (window) => {
       <form onSubmit={handleSubmit} className="max-w-md w-full">
         <input
           type="text"
-          placeholder="URL girin"
+          placeholder="Linkedin Profil Linkinizi Giriniz"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           className="w-full border border-gray-300 p-2 rounded"

@@ -1,5 +1,6 @@
 package obss.hris.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +35,6 @@ public class HumanResource {
     @Column(name = "lastname")
     private String lastName;
 
-    @OneToMany(mappedBy = "humanResource")
+    @OneToMany(mappedBy = "humanResource", fetch = FetchType.LAZY)
     private List<JobPost> jobPosts;
 }

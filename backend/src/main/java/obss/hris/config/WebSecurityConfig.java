@@ -2,11 +2,13 @@ package obss.hris.config;
 
 import lombok.AllArgsConstructor;
 import obss.hris.business.concretes.LinkedinOAuth2UserService;
+import obss.hris.core.util.handler.GenericExceptionHandler;
 import obss.hris.core.util.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +20,7 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenRespon
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -38,25 +41,31 @@ public class WebSecurityConfig {
 
     private final String HR_ROLE = "HR_USER";
     private final String CANDIDATE_ROLE = "OAUTH2_USER";
+    private final GenericExceptionHandler genericExceptionHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
                 .cors().configurationSource(corsConfigurationSource).and()
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET,"/login/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/hr/v1/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/candidate/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/login").hasAuthority(CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.POST,"/api/blacklist/v1/banCandidate").hasAnyAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.GET,"/api/candidate/v1/me").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/hr/v1/me").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/hr/v1/me/**").hasAuthority(HR_ROLE)
+
                         .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/jobApplications/**").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.POST,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.PUT,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.DELETE,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/jobApplications/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/jobApplications/v1").hasAuthority(CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.DELETE,"/api/jobPosts/v1/**").hasAuthority(HR_ROLE)
+
+                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/{jobPostId}/apply").hasAuthority(CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.PUT,"/api/jobApplications/v1/{jobApplicationId}/status").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.DELETE,"/api/jobApplications/v1").hasAuthority(CANDIDATE_ROLE)
+                        //.requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/scrape-skills").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAnyAuthority(HR_ROLE,CANDIDATE_ROLE)
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -66,6 +75,17 @@ public class WebSecurityConfig {
                                 .userService(this.linkedinOAuth2UserService))
                                 .successHandler(jwtAuthenticationSuccessHandler)
                 ).formLogin(withDefaults())
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error_message\":\"" + authException.getMessage() + "\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpStatus.FORBIDDEN.value());
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error_message\":\"" + accessDeniedException.getMessage() + "\"}");
+                        }))
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

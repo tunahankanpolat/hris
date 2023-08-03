@@ -1,12 +1,14 @@
 package obss.hris.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.HumanResourceService;
 import obss.hris.business.abstracts.JobPostService;
+import obss.hris.model.entity.JobApplicationStatus;
+import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.HumanResourceLoginRequest;
-import obss.hris.model.response.GetHumanResourceResponse;
-import obss.hris.model.response.GetJobPostResponse;
-import obss.hris.model.response.HumanResourceLoginResponse;
+import obss.hris.model.request.UpdateJobPostRequest;
+import obss.hris.model.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -23,18 +25,24 @@ public class HumanResourceController {
 
     @GetMapping("me")
     public ResponseEntity<GetHumanResourceResponse> getHumanResource(Principal principal) {
-        return ResponseEntity.ok(humanResourceService.getByLdapUserName(principal.getName()));
+        return ResponseEntity.ok(humanResourceService.getByUserNameForRequest(principal.getName()));
     }
 
     @GetMapping("me/jobPosts/{page}/{size}")
-    public ResponseEntity<List<GetJobPostResponse>> getHumanResourceJobPostsByPage(@PathVariable int page, @PathVariable int size) {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(jobPostService.getJobPostsByCreatorByPage(userName,page,size));
+    public ResponseEntity<List<GetJobPostResponse>> getHumanResourceJobPostsByPage(@PathVariable int page, @PathVariable int size, Principal principal) {
+        return ResponseEntity.ok(jobPostService.getJobPostsByCreatorByPage(principal.getName(),page,size));
+    }
+
+    @GetMapping("me/jobPosts/{jobPostId}/jobApplications/{page}/{size}")
+    public ResponseEntity<List<GetJobPostApplicationResponse>> getJobPostApplicationsByPage(
+            @PathVariable Long jobPostId,
+            @PathVariable int page, @PathVariable int size,
+            @RequestParam(value = "jobApplicationStatus", required = false) JobApplicationStatus jobApplicationStatus) {
+        return ResponseEntity.ok(humanResourceService.getJobPostApplicationsByPage(jobPostId,page,size,jobApplicationStatus));
     }
 
     @PostMapping("login")
-    public ResponseEntity<HumanResourceLoginResponse> login(@RequestBody HumanResourceLoginRequest humanResourceLoginRequest){
-        return ResponseEntity.ok(humanResourceService.login(humanResourceLoginRequest));
+    public ResponseEntity<LoginResponse> login(@RequestBody HumanResourceLoginRequest humanResourceLoginRequest, HttpServletRequest request){
+        return ResponseEntity.ok(humanResourceService.login(humanResourceLoginRequest, request));
     }
-
 }

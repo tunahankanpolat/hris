@@ -1,10 +1,12 @@
 package obss.hris.core.util.handler;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import obss.hris.exception.HumanResourceNotFoundException;
 import obss.hris.exception.JobPostNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ldap.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,9 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-@ControllerAdvice
 public class GenericExceptionHandler {
-
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException e) {
+        Map<String, String> errorResponseMap = new HashMap<>();
+        errorResponseMap.put("error_message", "Lütfen giriş yapınız.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponseMap);
+    }
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentialsException(BadCredentialsException e) {
         Map<String, String> errorResponseMap = new HashMap<>();

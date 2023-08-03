@@ -1,27 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { Circles } from "react-loader-spinner";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import CandidateService from "../services/candidateService";
+import { setCandidate } from "../store/candidate";
+import { toast } from "react-toastify";
 
 const CandidateAuthSuccess = () => {
-  const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
+  const candidate = useSelector((state) => state.candidate.candidate);
 
+  const dispatch = useDispatch();
   useEffect(() => {
-    const simulateAPICall = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8080/api/candidate/v1/token"
-        );
-        // Handle the response data if needed
-        setLoading(false);
-        setSuccess(true);
-      } catch (error) {
-        console.error("API call failed:", error);
-      }
-    };
-
-    simulateAPICall();
-  }, []);
+    if (!candidate) {
+      let candidateService = new CandidateService();
+      candidateService
+        .login()
+        .then((res) => {
+          dispatch(setCandidate(res.data));
+          setSuccess(true);
+        })
+        .catch((err) => {
+          toast.error(err.response.data.error_message);
+        });
+    }else{
+      setSuccess(true);
+    }
+  }, [candidate]);
 
   return (
     <div className="flex items-center justify-center h-screen">

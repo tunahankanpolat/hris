@@ -57,7 +57,7 @@ public class JobPost {
     @JoinColumn(name = "human_resource_id")
     private HumanResource humanResource;
 
-    @OneToMany(mappedBy = "jobPost")
+    @OneToMany(mappedBy = "jobPost", fetch = FetchType.LAZY)
     private List<JobApplication> jobApplications;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -71,5 +71,6 @@ public class JobPost {
         setActivationTime(updateJobPostRequest.getActivationTime());
         setClosureTime(updateJobPostRequest.getClosureTime());
         setRequiredSkills(updateJobPostRequest.getRequiredSkills());
+        setActive(updateJobPostRequest.isActive());
     }
 }

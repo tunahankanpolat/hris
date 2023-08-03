@@ -2,29 +2,30 @@ package obss.hris.controller;
 
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.JobApplicationService;
+import obss.hris.model.entity.JobApplicationStatus;
 import obss.hris.model.request.CreateJobApplicationRequest;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
+import obss.hris.model.response.GetJobPostApplicationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/jobApplication/v1")
+@RequestMapping("/api/jobApplications/v1")
 @AllArgsConstructor
 public class JobApplicationController {
     private JobApplicationService jobApplicationService;
 
-    @PostMapping()
-    public ResponseEntity<String> createJobApplication(@RequestBody CreateJobApplicationRequest jobApplication) {
-        jobApplicationService.createJobApplication(jobApplication);
-        return ResponseEntity.ok("Job application created successfully");
+    @PutMapping("/{jobApplicationId}/status")
+    public ResponseEntity<String> updateJobApplicationStatus(@PathVariable Long jobApplicationId, @RequestParam("jobApplicationStatus")JobApplicationStatus jobApplicationStatus) {
+        jobApplicationService.updateStatus(jobApplicationId,jobApplicationStatus);
+        return ResponseEntity.ok("Job application status updated successfully");
     }
 
-    @GetMapping({"/{page}/{size}"})
-    public ResponseEntity<List<GetCandidateJobApplicationResponse>> getCandidateJobApplicationsByPage(@RequestParam Long candidateId, @PathVariable int page, @PathVariable int size) {
-        return ResponseEntity.ok( jobApplicationService.getCandidateJobApplicationsByPage(candidateId,page,size));
+    @DeleteMapping("/{jobApplicationId}")
+    public ResponseEntity<String> deleteJobApplication(@PathVariable Long jobApplicationId) {
+        jobApplicationService.deleteJobApplication(jobApplicationId);
+        return ResponseEntity.ok("Job application deleted successfully");
     }
-
-
 }

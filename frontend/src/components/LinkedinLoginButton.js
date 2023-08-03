@@ -1,7 +1,7 @@
 export default function LinkedinLoginButton() {
   function linkedInLogin(e) {
     e.preventDefault();
-    var url = process.env.REACT_APP_CANDIDATE_LOGIN_URL;
+    var url = process.env.REACT_APP_CANDIDATE_AUTHORIZATION_URL;
     window.open(
       encodeURI(url),
       "LinkedIn Login",

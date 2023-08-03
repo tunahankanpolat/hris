@@ -12,7 +12,14 @@ export default function JobPostDetail(props) {
   const candidate = useSelector((state) => state.candidate.candidate);
   return (
     <div className="w-full h-full flex flex-col px-7 gap-12">
-      <h2 className="text-xl font-bold">{props.title}</h2>
+      <div>
+        <h2 className="text-obss-blue text-2xl font-bold">{props.title}</h2>
+        <h4 className="mt-2">{props.code}</h4>
+      </div>
+      <ul className="pl-5 space-y-3 text-gray-600 list-disc marker:text-[#0a66c2]">
+        <li>Aktivasyon Zamanı : {props.activationTime}</li>
+        <li>Kapanma Zamanı : {props.closureTime}</li>
+      </ul>
       <ul>
         <li>
           <BusinessIcon className="mr-3 mb-2" />
@@ -43,11 +50,11 @@ export default function JobPostDetail(props) {
 
       {candidate ? (
         props.isApplied ? (
-          <div className="bg-zinc-600 rounded-full w-40 pt-2 pb-3 text-white flex text-center opacity-90 hover:opacity-100 transition-opacity">
+          <div className="cursor-pointer bg-zinc-600 rounded-full w-40 pt-2 pb-3 text-white flex text-center opacity-90 hover:opacity-100 transition-opacity">
             <ClearIcon className="mx-3 w-1/2 h-1/2" /> Başvuruyu Sil
           </div>
         ) : (
-          <div className="bg-obss-blue rounded-full w-36 pt-2 pb-3 text-white flex text-center opacity-90 hover:opacity-100 transition-opacity">
+          <div className="cursor-pointer bg-obss-blue rounded-full w-36 pt-2 pb-3 text-white flex text-center opacity-90 hover:opacity-100 transition-opacity">
             <LaunchIcon className="mx-3 w-1/2 h-1/2" /> Başvur
           </div>
         )

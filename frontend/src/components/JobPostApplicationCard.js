@@ -3,17 +3,26 @@ import SyncIcon from "@mui/icons-material/Sync";
 import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
 import BlockIcon from "@mui/icons-material/Block";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BanModal from "./BanModal";
 export default function JobPostApplicationCard(props) {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-
+  const navigate = useNavigate();
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
+
+  const [showModal, setShowModal] = useState(false);
 
   const [profileDropdownVisible, setProfileDropdownVisible] = useState(false);
 
   const toggleProfileDropdown = () => {
     setProfileDropdownVisible(!profileDropdownVisible);
+  };
+
+  const handleUpdateStatus = (status) => {
+    toggleDropdown();
+    props.onUpdateStatus(props.jobApplicationId, status);
   };
   return (
     <div className="w-full h-32 p-3 flex flex-col pl-12 pr-8 bg-white">
@@ -22,14 +31,18 @@ export default function JobPostApplicationCard(props) {
         <div className="flex justify-between h-full">
           <img
             className="flex items-center justify-center h-full rounded-full mr-5 object-center object-cover"
-            src={props.profilePicture?props.profilePicture:process.env.REACT_APP_DEFAULT_PROFILE_AVATAR_URL}
-            alt="User Avatar" 
+            src={
+              props.profilePicture
+                ? props.profilePicture
+                : process.env.REACT_APP_DEFAULT_PROFILE_AVATAR_URL
+            }
+            alt="User Avatar"
           />
           <div className="flex flex-col">
             <div className="relative">
               <button
                 id="profileDropDown"
-                className="text-xl font-bold text-obss-blue"
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 h-10"
                 onClick={toggleProfileDropdown}
               >
                 {props.firstName} {" " + props.lastName}
@@ -41,41 +54,54 @@ export default function JobPostApplicationCard(props) {
                 } z-20 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 absolute`}
               >
                 <ul
-                  className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                  className="py-2 text-sm text-gray-700 dark:text-gray-200 text-center"
                   aria-labelledby="profileDropDown"
                 >
                   <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    <button
+                      onClick={() =>
+                        navigate(`/candidate/${props.candidateId}`)
+                      }
+                      className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Profili Görüntüle
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/candidate/${props.candidateId}/job-applications`
+                        )
+                      }
+                      className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Başvuruları Gör
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    <button
+                      onClick={() => setShowModal(true)}
+                      className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Kullanıcı Banla
-                    </a>
+                    </button>
                   </li>
                 </ul>
+
+                {showModal && (
+                  <BanModal
+                    candidateId={props.candidateId}
+                    onClose={() => setShowModal(false)}
+                  />
+                )}
               </div>
             </div>
 
             <ul>
               <li className="text-s text-obss-gray">
                 {(() => {
-                  if (props.state === "PROCESSING")
+                  if (props.status === "PROCESSING")
                     return (
                       <div className=" flex justify-between items-center item gap-3">
                         <SyncIcon className="text-orange-200 cursor-pointer" />
@@ -85,7 +111,7 @@ export default function JobPostApplicationCard(props) {
                         </div>
                       </div>
                     );
-                  else if (props.state === "ACCEPTED")
+                  else if (props.status === "ACCEPTED")
                     return (
                       <div className=" flex justify-between items-center item gap-3">
                         <ExpandCircleDownIcon className="text-obss-blue cursor-pointer" />
@@ -95,7 +121,7 @@ export default function JobPostApplicationCard(props) {
                         </div>
                       </div>
                     );
-                  else if (props.state === "REJECTED")
+                  else if (props.status === "REJECTED")
                     return (
                       <div className=" flex justify-between items-center item gap-3">
                         <BlockIcon className="text-red-500 cursor-pointer" />
@@ -107,7 +133,9 @@ export default function JobPostApplicationCard(props) {
                     );
                 })()}
               </li>
-              <li className="text-xs text-obss-gray pt-4">Başvurma Tarihi: {props.applicationTime}</li>
+              <li className="text-xs text-obss-gray pt-4">
+                Başvurma Tarihi: {props.applicationTime}
+              </li>
             </ul>
           </div>
         </div>
@@ -143,32 +171,32 @@ export default function JobPostApplicationCard(props) {
             } z-20 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 relative`}
           >
             <ul
-              className="py-2 text-sm text-gray-700 dark:text-gray-200"
+              className="text-center py-2 text-sm text-gray-700 dark:text-gray-200"
               aria-labelledby="dropdownDefaultButton"
             >
               <li>
-                <a
-                  href="#"
-                  className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                <button
+                  onClick={() => handleUpdateStatus("PROCESSING")}
+                  className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >
                   Başvuruyu İşleme Al
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                <button
+                  onClick={() => handleUpdateStatus("ACCEPTED")}
+                  className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >
                   Başvuruyu Kabul Et
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                <button
+                  onClick={() => handleUpdateStatus("REJECTED")}
+                  className="w-full block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                 >
                   Başvuruyu Red Et
-                </a>
+                </button>
               </li>
             </ul>
           </div>

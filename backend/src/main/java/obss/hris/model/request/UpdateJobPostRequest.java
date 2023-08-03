@@ -19,4 +19,5 @@ public class UpdateJobPostRequest {
     private String company;
     private String location;
     private List<String> requiredSkills;
+    private boolean isActive;
 }

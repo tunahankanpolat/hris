@@ -47,4 +47,7 @@ public class Candidate {
 
     @Column(name="is_banned", columnDefinition = "boolean default false")
     private boolean isBanned;
+
+    @OneToMany(mappedBy = "candidate" , fetch = FetchType.LAZY)
+    private List<JobApplication> jobApplications;
 }
