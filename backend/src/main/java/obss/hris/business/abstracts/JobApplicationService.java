@@ -18,9 +18,11 @@ public interface JobApplicationService {
     void deleteJobApplication(Long jobApplicationId);
 
     void updateStatus(Long jobApplicationId, JobApplicationStatus jobApplicationStatus);
-
-    List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus);
+    List<GetJobPostApplicationResponse> getJobPostApplicationsByPageByStatusBySearchKeyword(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus, String searchKeyword);
+    List<GetJobPostApplicationResponse> getJobPostApplicationsByPageBySearchKeyword(Long jobPostId, int page, int size, String searchKeyword);
+    List<GetJobPostApplicationResponse> getJobPostApplicationsByPageByStatus(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus);
+    List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size);
     List<JobApplication> getCandidateJobApplications(Long candidateId);
-    public void batchUpdateStatus(List<JobApplication> jobApplications, JobApplicationStatus jobApplicationStatus);
+    void batchUpdateStatus(List<JobApplication> jobApplications, JobApplicationStatus jobApplicationStatus);
 
 }

@@ -16,6 +16,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -35,6 +36,7 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     private JwtUtils jwtUtils;
     private WebDriver webDriver;
     private JobApplicationService jobApplicationService;
+    private ElasticSearchService elasticSearchService;
     @Value("${linkedin.login-url}")
     private String linkedinLoginUrl;
 
@@ -44,12 +46,13 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     @Value("${linkedin.account-password}")
     private String linkedinAccountPassword;
 
-    public CandidateServiceImpl(ModelMapperService modelMapperService, CandidateRepository candidateRepository, JwtUtils jwtUtils, WebDriver webDriver, JobApplicationService jobApplicationService) {
+    public CandidateServiceImpl(ModelMapperService modelMapperService, CandidateRepository candidateRepository, JwtUtils jwtUtils, WebDriver webDriver, JobApplicationService jobApplicationService, ElasticSearchService elasticSearchService) {
         this.modelMapperService = modelMapperService;
         this.candidateRepository = candidateRepository;
         this.jwtUtils = jwtUtils;
         this.webDriver = webDriver;
         this.jobApplicationService = jobApplicationService;
+        this.elasticSearchService = elasticSearchService;
     }
 
     @Override
@@ -86,6 +89,7 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
             candidate.setSkills(scrapeResponse.getSkills());
             candidate.setAbout(scrapeResponse.getAbout());
             candidateRepository.save(candidate);
+            elasticSearchService.saveCandidate(modelMapperService.forCreate().map(candidate, ElkCandidate.class));
         }
         return getCandidateLoginResponse(request);
     }

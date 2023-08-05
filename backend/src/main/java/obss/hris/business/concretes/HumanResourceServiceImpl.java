@@ -79,10 +79,18 @@ public class HumanResourceServiceImpl implements HumanResourceService {
         return loginResponse;
     }
     @Override
-    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus) {
-        return jobApplicationService.getJobPostApplicationsByPage(jobPostId, page, size, jobApplicationStatus);
-    }
+    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus, String searchKeyword) {
+        if (jobApplicationStatus != null && searchKeyword == null) {
+            return jobApplicationService.getJobPostApplicationsByPageByStatus(jobPostId, page, size, jobApplicationStatus);
+        } else if(jobApplicationStatus == null && searchKeyword != null) {
+            return jobApplicationService.getJobPostApplicationsByPageBySearchKeyword(jobPostId, page, size, searchKeyword);
+        } else if(jobApplicationStatus != null && searchKeyword != null) {
+            return jobApplicationService.getJobPostApplicationsByPageByStatusBySearchKeyword(jobPostId, page, size, jobApplicationStatus, searchKeyword);
+        }else{
+            return jobApplicationService.getJobPostApplicationsByPage(jobPostId, page, size);
+        }
 
+    }
     @Override
     public List<GetJobPostResponse> getJobPostsByPage(String userName, int page, int size) {
         HumanResource humanResource = getByUserName(userName);

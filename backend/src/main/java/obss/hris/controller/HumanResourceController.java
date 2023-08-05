@@ -32,13 +32,13 @@ public class HumanResourceController {
     public ResponseEntity<List<GetJobPostResponse>> getHumanResourceJobPostsByPage(@PathVariable int page, @PathVariable int size, Principal principal) {
         return ResponseEntity.ok(jobPostService.getJobPostsByCreatorByPage(principal.getName(),page,size));
     }
-
     @GetMapping("me/jobPosts/{jobPostId}/jobApplications/{page}/{size}")
     public ResponseEntity<List<GetJobPostApplicationResponse>> getJobPostApplicationsByPage(
             @PathVariable Long jobPostId,
             @PathVariable int page, @PathVariable int size,
-            @RequestParam(value = "jobApplicationStatus", required = false) JobApplicationStatus jobApplicationStatus) {
-        return ResponseEntity.ok(humanResourceService.getJobPostApplicationsByPage(jobPostId,page,size,jobApplicationStatus));
+            @RequestParam(value = "jobApplicationStatus", required = false) JobApplicationStatus jobApplicationStatus,
+            @RequestParam(required = false) String searchKeyword) {
+        return ResponseEntity.ok(humanResourceService.getJobPostApplicationsByPage(jobPostId,page,size,jobApplicationStatus, searchKeyword));
     }
 
     @PostMapping("login")

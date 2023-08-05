@@ -14,4 +14,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication,L
     List<JobApplication> findAllByCandidate_CandidateId(Long candidateId, Pageable pageable);
     List<JobApplication> findAllByCandidate_CandidateId(Long candidateId);
     List<JobApplication> findAllByJobPost_JobPostIdAndStatus(Long jobPostId, JobApplicationStatus jobApplicationStatus, Pageable pageable);
+    List<JobApplication> findByJobPost_JobPostId(Long jobPostId);
+    JobApplication findAllByJobPost_JobPostIdAndCandidate_CandidateIdAndStatus(Long jobPostId, Long candidateId, JobApplicationStatus jobApplicationStatus);
+    JobApplication findAllByJobPost_JobPostIdAndCandidate_CandidateId(Long jobPostId, Long candidateId);
 }

@@ -1,16 +1,15 @@
 package obss.hris.business.concretes;
 
+import co.elastic.clients.elasticsearch.ml.Job;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.CandidateService;
+import obss.hris.business.abstracts.ElasticSearchService;
 import obss.hris.business.abstracts.JobApplicationService;
 import obss.hris.business.abstracts.JobPostService;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.CandidateNotFoundException;
 import obss.hris.exception.JobPostNotFoundException;
-import obss.hris.model.entity.Candidate;
-import obss.hris.model.entity.JobApplication;
-import obss.hris.model.entity.JobApplicationStatus;
-import obss.hris.model.entity.JobPost;
+import obss.hris.model.entity.*;
 import obss.hris.model.request.CreateJobApplicationRequest;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetJobPostApplicationResponse;
@@ -20,6 +19,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -27,7 +28,7 @@ import java.util.List;
 public class JobApplicationServiceImpl implements JobApplicationService {
     private JobApplicationRepository jobApplicationRepository;
     private ModelMapperService modelMapperService;
-
+    private ElasticSearchService elasticSearchService;
     @Override
     public JobApplication createJobApplication(JobPost jobPost, Candidate candidate) {
         JobApplication newJobApplication = new JobApplication();
@@ -38,26 +39,54 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     }
 
     @Override
-    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus) {
-        List<JobApplication> jobApplications;
+    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        if(jobApplicationStatus == null){
-            jobApplications = jobApplicationRepository.findAllByJobPost_JobPostId(jobPostId, pageable);
-        }else{
-            jobApplications = jobApplicationRepository.findAllByJobPost_JobPostIdAndStatus(jobPostId, jobApplicationStatus, pageable);
+        List<JobApplication> jobApplications = jobApplicationRepository.findAllByJobPost_JobPostId(jobPostId, pageable);
+        return getMappedJobApplications(jobApplications);
+    }
+
+    @Override
+    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPageByStatus(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<JobApplication> jobApplications = jobApplicationRepository.findAllByJobPost_JobPostIdAndStatus(jobPostId, jobApplicationStatus, pageable);
+        return getMappedJobApplications(jobApplications);
+    }
+    @Override
+    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPageByStatusBySearchKeyword(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus, String searchKeyword) {
+        List<Long> candidateIds = getCandidateIdAppliedToJobPost(jobPostId);
+        List<ElkCandidate> elkCandidates = elasticSearchService.searchOnCandidateForJobPost
+                (candidateIds,searchKeyword, page, size);
+
+        List<JobApplication> jobApplications = elkCandidates.stream().map(
+                elkCandidate -> jobApplicationRepository.findAllByJobPost_JobPostIdAndCandidate_CandidateIdAndStatus
+                        (jobPostId, elkCandidate.getCandidateId(), jobApplicationStatus)).toList();
+        return getMappedJobApplications(jobApplications);
+    }
+    @Override
+    public List<GetJobPostApplicationResponse> getJobPostApplicationsByPageBySearchKeyword(Long jobPostId, int page, int size, String searchKeyword) {
+        List<Long> candidateIds = getCandidateIdAppliedToJobPost(jobPostId);
+        List<ElkCandidate> elkCandidates = elasticSearchService.searchOnCandidateForJobPost(candidateIds,searchKeyword, page, size);
+        List<JobApplication> jobApplications = elkCandidates.stream().map(
+                elkCandidate -> jobApplicationRepository.findAllByJobPost_JobPostIdAndCandidate_CandidateId
+                        (jobPostId, elkCandidate.getCandidateId())).toList();
+        return getMappedJobApplications(jobApplications);
+    }
+    private List<GetJobPostApplicationResponse> getMappedJobApplications(List<JobApplication> jobApplications) {
+        if (jobApplications == null) {
+            return Collections.emptyList();
         }
 
-        TypeMap<JobApplication, GetJobPostApplicationResponse> typeMap = this.modelMapperService.forResponse().getTypeMap(JobApplication.class, GetJobPostApplicationResponse.class);
-        if(typeMap == null){
-            typeMap = this.modelMapperService.forResponse().createTypeMap(JobApplication.class, GetJobPostApplicationResponse.class);
+        List<GetJobPostApplicationResponse> mappedResponses = new ArrayList<>();
 
-            typeMap.addMappings(
-                    mapper -> mapper.map(src -> src.getCandidate().getCandidateId(), GetJobPostApplicationResponse::setCandidateId)
-            );
+        for (JobApplication jobApplication : jobApplications) {
+            if (jobApplication != null && jobApplication.getCandidate() != null) {
+                GetJobPostApplicationResponse response = modelMapperService.forResponse().map(jobApplication, GetJobPostApplicationResponse.class);
+                response.setCandidateId(jobApplication.getCandidate().getCandidateId());
+                mappedResponses.add(response);
+            }
         }
 
-        return jobApplications.stream().map(jobApplication ->
-                modelMapperService.forResponse().map(jobApplication, GetJobPostApplicationResponse.class)).toList();
+        return mappedResponses;
     }
 
     @Override
@@ -66,9 +95,8 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     }
     @Override
     public void batchUpdateStatus(List<JobApplication> jobApplications, JobApplicationStatus jobApplicationStatus) {
-        jobApplications.forEach(jobApplication -> {
-            jobApplication.setStatus(jobApplicationStatus);
-        });
+        jobApplications.forEach(jobApplication ->
+            jobApplication.setStatus(jobApplicationStatus));
         jobApplicationRepository.saveAll(jobApplications);
     }
     @Override
@@ -78,6 +106,11 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
         return jobApplications.stream().map(jobApplication ->
                 modelMapperService.forResponse().map(jobApplication, GetCandidateJobApplicationResponse.class)).toList();
+    }
+
+    private List<Long> getCandidateIdAppliedToJobPost(Long jobPostId){
+        List<JobApplication> jobApplications = jobApplicationRepository.findByJobPost_JobPostId(jobPostId);
+        return jobApplications.stream().map(jobApplication -> jobApplication.getCandidate().getCandidateId()).toList();
     }
 
     @Override

@@ -9,6 +9,7 @@ import obss.hris.model.response.LoginResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.getCandidateByIdForRequest(candidateId));
     }
 
+    @Transactional
     @GetMapping("scrape-skills")
     public ResponseEntity<LoginResponse> scrapeSkillsAndCreateCandidateIfNotExist(@RequestParam String linkedinUrl, HttpServletRequest request) {
         return ResponseEntity.ok(candidateService.scrapeSkillsAndCreateCandidateIfNotExist(linkedinUrl, request));

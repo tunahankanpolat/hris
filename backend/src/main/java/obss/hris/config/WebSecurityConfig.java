@@ -59,7 +59,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.PUT,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.DELETE,"/api/jobPosts/v1/**").hasAuthority(HR_ROLE)
-
+                        .requestMatchers(HttpMethod.GET,"/api/search/v1/**").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/{jobPostId}/apply").hasAuthority(CANDIDATE_ROLE)
                         .requestMatchers(HttpMethod.PUT,"/api/jobApplications/v1/{jobApplicationId}/status").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.DELETE,"/api/jobApplications/v1").hasAuthority(CANDIDATE_ROLE)

@@ -15,6 +15,7 @@ public interface HumanResourceService {
     HumanResource getByUserName(String userName);
     GetHumanResourceResponse getByUserNameForRequest(String userName);
     LoginResponse login(HumanResourceLoginRequest loginRequest, HttpServletRequest request);
-    List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus);
+    List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus, String searchKeyword);
+
     List<GetJobPostResponse> getJobPostsByPage(String userName, int page, int size);
 }
