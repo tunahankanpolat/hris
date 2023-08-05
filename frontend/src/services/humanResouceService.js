@@ -16,15 +16,32 @@ export default class HumanResourceService {
       }
     );
   }
-  async getJobPostApplications(token, jobPostId, page, size, status) {
-    return await axios.get(
-      process.env.REACT_APP_HUMAN_RESOURCE_JOB_POSTS_URL + `/${jobPostId}/jobApplications/${page}/${size}` + (status ? `?jobApplicationStatus=${status}` : ""),
-      {
-        headers: {
-          Authorization: "Bearer " + token,
-        },
+  async getJobPostApplications(
+    token,
+    jobPostId,
+    page,
+    size,
+    status,
+    searchKeyword
+  ) {
+    let apiUrl = `${process.env.REACT_APP_HUMAN_RESOURCE_JOB_POSTS_URL}/${jobPostId}/jobApplications/${page}/${size}`;
+    debugger;
+    if (status || searchKeyword) {
+      apiUrl += "?";
+      if (status) {
+        apiUrl += `jobApplicationStatus=${status}`;
+        if (searchKeyword) {
+          apiUrl += `&searchKeyword=${searchKeyword}`;
+        }
+      } else {
+        apiUrl += `searchKeyword=${searchKeyword}`;
       }
-    );
-  }
+    }
 
+    return await axios.get(apiUrl, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    });
+  }
 }

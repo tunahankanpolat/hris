@@ -7,15 +7,16 @@ import BlockIcon from "@mui/icons-material/Block";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import JobPostService from "../services/jobPostService";
-import Search from "../components/Search";
+import SearchBar from "../components/SearchBar";
 import JobApplicationService from "../services/jobApplicationService";
 import { toast } from "react-toastify";
 import HumanResourceService from "../services/humanResouceService";
+import SearchService from "../services/searchService";
 
 export default function JobPostApplications() {
   const { id } = useParams();
   const [jobPostApplications, setJobPostApplications] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState(false);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState(false);
   const humanResource = useSelector(
@@ -29,7 +30,8 @@ export default function JobPostApplications() {
         id,
         page,
         process.env.REACT_APP_PAGE_SIZE,
-        filter
+        filter,
+        searchKeyword
       )
       .then((result) => {
         setJobPostApplications(result.data);
@@ -41,18 +43,18 @@ export default function JobPostApplications() {
 
   const handleFilter = (status) => {
     debugger;
-    if(filter === status){
+    if (filter === status) {
       setFilter(false);
       setPage(0);
-    }else{
+    } else {
       setPage(0);
       setFilter(status);
     }
-
   };
   useEffect(() => {
     getJobPostApplications();
-  }, [filter]);
+  }, [filter, searchKeyword]);
+
   const handlePageChange = (page) => {
     page = page - 1;
     let humanResouceService = new HumanResourceService();
@@ -62,7 +64,8 @@ export default function JobPostApplications() {
         id,
         page,
         process.env.REACT_APP_PAGE_SIZE,
-        filter
+        filter,
+        searchKeyword
       )
       .then((result) => {
         if (result.data.length !== 0) {
@@ -93,6 +96,39 @@ export default function JobPostApplications() {
         toast.error(err.response.data);
       });
   };
+  const handleSearch = (keyword) => {
+    if (keyword === "") {
+      setSearchKeyword(false);
+    } else {
+      setSearchKeyword(keyword);
+    }
+    // if (keyword === "") {
+    //   setFilteredJobApplications(jobPostApplications);
+    //   return;
+    // }
+    // let searchService = new SearchService();
+    // searchService
+    //   .searchOnCandidateForJobPost(
+    //     humanResource.token,
+    //     keyword,
+    //     page,
+    //     process.env.REACT_APP_PAGE_SIZE,
+    //     id
+    //   )
+    //   .then((result) => {
+    //     const matchingCandidateIds = result.data.map(
+    //       (candidate) => candidate.candidateId
+    //     );
+    //     const filteredJobApplications = jobPostApplications.filter(
+    //       (jobApplication) =>
+    //         matchingCandidateIds.includes(jobApplication.candidateId)
+    //     );
+    //     setFilteredJobApplications(filteredJobApplications);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+  };
   return (
     <main className="wrapper flex bg-job-posts-background pl-48 pr-48 pb-8">
       <div className="w-full h-full shadaow pt-8">
@@ -113,7 +149,7 @@ export default function JobPostApplications() {
               </ul>
             </div>
           </div>
-          <Search />
+          <SearchBar handleSearchSubmit={handleSearch} />
         </div>
         <div className="bg-white rounded-3xl w-full wrapper overflow-auto">
           <div className="w-full h-full">

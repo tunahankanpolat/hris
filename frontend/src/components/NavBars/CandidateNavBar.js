@@ -4,7 +4,7 @@ import WorkIcon from "@mui/icons-material/Work";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LogoutIcon from '@mui/icons-material/Logout';
-import Search from "../Search";
+import SearchBar from "../SearchBar";
 export default function CandidateNavBar() {
   const handleLogout = async () => {
     localStorage.removeItem("candidate");
@@ -18,7 +18,6 @@ export default function CandidateNavBar() {
         </NavLink>
       </div>
       <div className="flex gap-16 items-center">
-        <Search />
         <NavLink className="aria-[current=page]:text-obss-blue" to={"/candidate/me/job-applications"}>
           <BookmarkIcon /> <span>Başvurduğum İlanlar</span>
         </NavLink>

@@ -11,115 +11,125 @@ import CandidateJobApplication from "./pages/CandidateJobApplication";
 import JobPostCreate from "./pages/JobPostCreate";
 import Layout from "./layouts/Layout";
 import CandidatePrivateRoute from "./components/PrivateRouters/CandidatePrivateRoute";
+import CandidateSearch from "./pages/CandidateSearch";
 const routes = [
-    {
-        path: '/',
-        element: <Layout/>,
-        children: [
-            {
-                path: '/',
-                element: <Login/>,
-                login: true
-            },
-            {
-                path: '/login',
-                element: <Login/>,
-                login: true
-            },
-            {
-                path: 'job-posts',
-                element: <JobPosts/>,
-                login: false
-            }
-        ]
-    },
-    {
-        path: 'human-resource',
-        element: <Layout/>,
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <Login />,
+        login: true,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+        login: true,
+      },
+      {
+        path: "job-posts",
+        element: <JobPosts />,
+        login: false,
+      },
+      {
+        path: "search/candidate/:keyword",
+        element: <CandidateSearch />,
         humanResourceAuth: true,
-        children: [
-            {
-                path: 'job-posts',
-                element: <HumanResouceJobPosts/>
-            },
-            {
-                path: 'job-posts/:id/job-applications',
-                element: <JobPostApplications/>
-            },
-            {
-                path: 'job-posts/create',
-                element: <JobPostCreate/>
-            }
-        ]
-    },
-    {
-        path: 'candidate',
-        element: <Layout/>,
-        children: [
-            {
-                path: ':id',
-                element: <CandidateProfile/>,
-                humanResourceAuth: true,
-            },
-            {
-                path: 'me',
-                element: <CandidateProfile/>,
-                candidateAuth: true,
-            },
-            {
-                path: ':id/job-applications',
-                element: <CandidateJobApplication/>,
-                humanResourceAuth: true,
-            },
-            {
-                path: 'me/job-applications',
-                element: <CandidateJobApplication/>,
-                candidateAuth: true,
-            }
-            
-        ]
-    },
-    // {
-    //     path: 'candidate/:id',
-    //     element: <CandidateProfile/>
-    // },
-    // {
-    //     path: 'candidate/:id/job-applications',
-    //     element: <CandidateJobApplication/>
-    // },
-    {
-        path: 'candidate/scrape/skills',
-        element: <CandidateScrape/>
-    },
-    {
-        path: '/candidate/auth/success',
-        element: <CandidateAuthSuccess/>
-    },
-    // {
-    //     path: '/human-resource/job-posts',
-    //     element: <HumanResouceJobPosts/>
-    // },
-    // {
-    //     path: '/human-resource/job-posts/:id/job-applications',
-    //     element: <JobPostApplications/>
-    // },
-]
+      },
+    ],
+  },
+  {
+    path: "human-resource",
+    element: <Layout />,
+    humanResourceAuth: true,
+    children: [
+      {
+        path: "job-posts",
+        element: <HumanResouceJobPosts />,
+      },
+      {
+        path: "job-posts/:id/job-applications",
+        element: <JobPostApplications />,
+      },
+      {
+        path: "job-posts/create",
+        element: <JobPostCreate />,
+      },
+    ],
+  },
+  {
+    path: "candidate",
+    element: <Layout />,
+    children: [
+      {
+        path: ":id",
+        element: <CandidateProfile />,
+        humanResourceAuth: true,
+      },
+      {
+        path: "me",
+        element: <CandidateProfile />,
+        candidateAuth: true,
+      },
+      {
+        path: ":id/job-applications",
+        element: <CandidateJobApplication />,
+        humanResourceAuth: true,
+      },
+      {
+        path: "me/job-applications",
+        element: <CandidateJobApplication />,
+        candidateAuth: true,
+      },
+    ],
+  },
+  // {
+  //     path: 'candidate/:id',
+  //     element: <CandidateProfile/>
+  // },
+  // {
+  //     path: 'candidate/:id/job-applications',
+  //     element: <CandidateJobApplication/>
+  // },
+  {
+    path: "candidate/scrape/skills",
+    element: <CandidateScrape />,
+  },
+  {
+    path: "/candidate/auth/success",
+    element: <CandidateAuthSuccess />,
+  },
+  // {
+  //     path: '/human-resource/job-posts',
+  //     element: <HumanResouceJobPosts/>
+  // },
+  // {
+  //     path: '/human-resource/job-posts/:id/job-applications',
+  //     element: <JobPostApplications/>
+  // },
+];
 
-const authCheck = routes => routes.map(route => {
-    if(route?.humanResourceAuth) {
-        route.element = <HumanResourcePrivateRoute>{route.element}</HumanResourcePrivateRoute>
+const authCheck = (routes) =>
+  routes.map((route) => {
+    if (route?.humanResourceAuth) {
+      route.element = (
+        <HumanResourcePrivateRoute>{route.element}</HumanResourcePrivateRoute>
+      );
     }
-    if(route?.candidateAuth) {
-        route.element = <CandidatePrivateRoute>{route.element}</CandidatePrivateRoute>
+    if (route?.candidateAuth) {
+      route.element = (
+        <CandidatePrivateRoute>{route.element}</CandidatePrivateRoute>
+      );
     }
-    if(route?.login) {
-        route.element = <PublicPrivateRoute>{route.element}</PublicPrivateRoute>
+    if (route?.login) {
+      route.element = <PublicPrivateRoute>{route.element}</PublicPrivateRoute>;
     }
-    if(route?.children) {
-        route.children = authCheck(route.children)
+    if (route?.children) {
+      route.children = authCheck(route.children);
     }
 
     return route;
-})
+  });
 
 export default authCheck(routes);

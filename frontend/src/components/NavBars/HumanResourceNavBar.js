@@ -4,13 +4,22 @@ import WorkIcon from "@mui/icons-material/Work";
 import AddIcon from '@mui/icons-material/Add';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LogoutIcon from '@mui/icons-material/Logout';
-import Search from "../Search";
-
+import SearchBar from "../SearchBar";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 export default function HumanResourceNavBar() {
   const handleLogout = async () => {
     localStorage.removeItem("humanResource");
     window.location.href = "/";
   }
+  const navigate = useNavigate();
+  const [searchKeyword, setSearchKeyword] = useState(false);
+
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+    navigate(`/search/candidate/${keyword}`)
+};
+
   return (
     <nav className="flex justify-between h-20  items-center relative text text-gray-800 shadow-2xl pl-48 pr-48">
       <div className="w-20">
@@ -19,7 +28,7 @@ export default function HumanResourceNavBar() {
         </NavLink>
       </div>
       <div className="flex gap-16 items-center">
-        <Search />
+      <SearchBar handleSearchSubmit={handleSearch} />
         <NavLink className="aria-[current=page]:text-obss-blue" to={"/human-resource/job-posts/create"}>
           <AddIcon /> <span>İş İlanı Oluştur</span>
         </NavLink>
