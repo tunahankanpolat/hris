@@ -1,31 +1,31 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import CandidateService from "../services/candidateService";
+import { getCandidate, getHumanResource } from "../store/storage";
 
 export default function CandidateProfile() {
   const { id } = useParams();
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   const [candidate, setCandidate] = useState(false);
-  const candidateStore = useSelector((state) => state.candidate.candidate);
+  const candidateStore = getCandidate();
 
   useEffect(() => {
     let candidateService = new CandidateService();
     let token = humanResource.token;
-    if(!id){
+    if (!id) {
       token = candidateStore.token;
     }
     candidateService
       .getCandidateProfile(token, id)
       .then((result) => {
+        debugger;
         setCandidate(result.data);
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
+  debugger;
   return (
     <main className="wrapper flex bg-job-posts-background pl-48 pr-48 pb-8">
       <div className="flex w-full h-full shadaow pt-8">
@@ -34,17 +34,24 @@ export default function CandidateProfile() {
             <div className="h-2/5 w-full">
               <img
                 className="w-full rounded-3xl h-full object-center object-cover"
-                src="cover.jpg"
+                src={process.env.REACT_APP_DEFAULT_COVER_PHOTO_URL}
               />
             </div>
             <div className="ml-10 flex flex-col items-center justify-start text-center -translate-y-10">
               <img
                 className="flex items-center justify-center w-40 h-40 rounded-full"
-                src={candidate && candidate.profilePicture}
+                src={
+                  candidate.profilePicture
+                    ? candidate.profilePicture
+                    : process.env.REACT_APP_DEFAULT_PROFILE_AVATAR_URL
+                }
               />
-              <h1 className="text-2xl mt-3">
+              {!id && !candidate.about && <button className="mt-10 w-full justify-center cursor-pointer bg-[#e9e9e9] rounded-full pt-2 pb-3 text-obss-gray flex hover:bg-[#d9d9d9] transition-color">Lütfen Linkedin Profil Adresinizi Giriniz...</button>}
+
+              <h1 className="text-2xl mt-10">
                 {candidate && candidate.firstName + " " + candidate.lastName}
               </h1>
+
             </div>
 
             <div className="h-3/5 w-full rounded-3xl bg-white">

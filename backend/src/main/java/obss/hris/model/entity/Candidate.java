@@ -40,6 +40,7 @@ public class Candidate {
 
     private String profilePicture;
 
+    @Column(columnDefinition = "TEXT")
     private String about;
 
     @ElementCollection(fetch = FetchType.EAGER)

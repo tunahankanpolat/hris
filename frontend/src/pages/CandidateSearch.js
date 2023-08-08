@@ -5,15 +5,13 @@ import Pagination from "../components/Pagination";
 import CandidateCard from "../components/CandidateCard";
 import SearchService from "../services/searchService";
 import { useState } from "react";
-import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { getHumanResource } from "../store/storage";
 export default function CandidateSearch(props) {
   const [page, setPage] = useState(0);
   const [candidates, setCandidates] = useState(false);
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   const { keyword } = useParams();
   const handlePageChange = (page) => {
     page = page - 1;

@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { getCandidate, getHumanResource } from "../../store/storage";
 export default function PublicPrivateRoute({children}) {
-  const humanResource = useSelector((state) => state.humanResource.humanResource);
-  const candidate = useSelector((state) => state.candidate.candidate);
+  const humanResource = getHumanResource();
+  const candidate = getCandidate();
   
   if (humanResource || candidate) {
     return (

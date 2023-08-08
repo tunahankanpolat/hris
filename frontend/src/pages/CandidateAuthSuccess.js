@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import CandidateService from "../services/candidateService";
-import { setCandidate } from "../store/candidate";
 import { toast } from "react-toastify";
+import { getCandidate, setCandidate } from "../store/storage";
 
 const CandidateAuthSuccess = () => {
   const [success, setSuccess] = useState(false);
-  const candidate = useSelector((state) => state.candidate.candidate);
+  const candidate = getCandidate();
 
-  const dispatch = useDispatch();
   useEffect(() => {
     if (!candidate) {
       let candidateService = new CandidateService();
       candidateService
         .login()
         .then((res) => {
-          dispatch(setCandidate(res.data));
+          setCandidate(res.data);
           setSuccess(true);
         })
         .catch((err) => {

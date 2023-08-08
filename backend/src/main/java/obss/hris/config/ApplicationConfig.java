@@ -1,11 +1,11 @@
 package obss.hris.config;
 
+import obss.hris.business.concretes.HttpCookieOAuth2AuthorizationRequestRepository;
 import org.modelmapper.ModelMapper;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,11 +19,19 @@ public class ApplicationConfig {
         return new ModelMapper();
     }
 
-    @Bean
-    WebDriver webDriver() {
-        return new ChromeDriver();
-    }
+//    @Bean
+//    WebDriver webDriver() {
+//        return new ChromeDriver();
+//    }
 
+    @Bean
+    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
+        return new HttpCookieOAuth2AuthorizationRequestRepository();
+    }
+    @Bean
+    public LocalValidatorFactoryBean validator() {
+        return new LocalValidatorFactoryBean();
+    }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import BlacklistService from '../services/blacklistService';
 import { toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
+import { getHumanResource } from '../store/storage';
 const BanModal = ({ onClose, candidateId}) => {
   const [reason, setReason] = useState('');
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   const handleBan = () => {
     debugger;
     // Axios isteği burada gerçekleştirilecek

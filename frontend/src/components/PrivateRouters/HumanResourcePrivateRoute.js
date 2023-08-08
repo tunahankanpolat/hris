@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { getHumanResource } from "../../store/storage";
 export default function HumanResourcePrivateRoute({children}) {
-  const humanResource = useSelector((state) => state.humanResource.humanResource);
+  const humanResource = getHumanResource();
   const location = useLocation();
   
   if (!humanResource) {

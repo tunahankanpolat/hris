@@ -6,15 +6,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import JobPostService from "../services/jobPostService";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
+import { getHumanResource } from "../store/storage";
 
 export default function JobPostDetailForUpdate(props) {
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   const navigate = useNavigate();
   const [isTitleEditing, setTitleEditing] = useState(false);
   const [isLocationEditing, setLocationEditing] = useState(false);
@@ -29,7 +27,8 @@ export default function JobPostDetailForUpdate(props) {
   const [active, setActive] = useState();
   const [newSkill, setNewSkill] = useState("");
   const [dropdownVisible, setDropdownVisible] = useState(false);
-
+  const [activationTime, setActivationTime] = useState();
+  const [closureTime, setClosureTime] = useState();
   useEffect(() => {
     setTitle(props.title);
     setCompany(props.company);
@@ -37,7 +36,8 @@ export default function JobPostDetailForUpdate(props) {
     setSkills(props.requiredSkills);
     setDescription(props.description);
     setActive(props.active);
-    debugger;
+    setActivationTime(props.activationTime);
+    setClosureTime(props.closureTime);
   }, [props]);
 
   const handleSave = async (event) => {
@@ -49,9 +49,9 @@ export default function JobPostDetailForUpdate(props) {
       location: location,
       requiredSkills: skills,
       description: description,
-      activationTime: props.activationTime,
-      closureTime: props.closureTime,
       requiredSkills: skills,
+      closureTime: closureTime,
+      activationTime: activationTime,
       active: active,
     };
     let jobPostService = new JobPostService();
@@ -62,7 +62,7 @@ export default function JobPostDetailForUpdate(props) {
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data.error_message);
+        toast.error(err.response.data.error_message.toString());
       });
   };
 
@@ -77,7 +77,7 @@ export default function JobPostDetailForUpdate(props) {
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data.error_message);
+        toast.error(err.response.data.error_message.toString());
       });
   };
 
@@ -122,7 +122,6 @@ export default function JobPostDetailForUpdate(props) {
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
-  debugger;
   return (
     <div className="w-full h-full flex flex-col px-7 gap-12">
       <div className="flex justify-between w-full gap-5">
@@ -206,8 +205,8 @@ export default function JobPostDetailForUpdate(props) {
       </div>
       <div className="flex flex-col justify-start">
         <ul className="pl-5 space-y-3 text-gray-600 list-disc marker:text-[#0a66c2]">
-          <li>Aktivasyon Zamanı : {props.activationTime}</li>
-          <li>Kapanma Zamanı : {props.closureTime}</li>
+          <li>Aktivasyon Zamanı : {activationTime}</li>
+          <li>Kapanma Zamanı : {closureTime}</li>
         </ul>
       </div>
       <div>

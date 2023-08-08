@@ -3,13 +3,8 @@ package obss.hris.controller;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.JobApplicationService;
 import obss.hris.model.entity.JobApplicationStatus;
-import obss.hris.model.request.CreateJobApplicationRequest;
-import obss.hris.model.response.GetCandidateJobApplicationResponse;
-import obss.hris.model.response.GetJobPostApplicationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/jobApplications/v1")
@@ -23,6 +18,11 @@ public class JobApplicationController {
         return ResponseEntity.ok("Job application status updated successfully");
     }
 
+    @GetMapping("sa")
+    public ResponseEntity<String> sa() {
+        jobApplicationService.sa();
+        return ResponseEntity.ok("Job application status updated successfully");
+    }
     @DeleteMapping("/{jobApplicationId}")
     public ResponseEntity<String> deleteJobApplication(@PathVariable Long jobApplicationId) {
         jobApplicationService.deleteJobApplication(jobApplicationId);

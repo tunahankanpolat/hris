@@ -1,5 +1,6 @@
 package obss.hris.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.JobPostService;
 import obss.hris.model.entity.JobApplicationStatus;
@@ -38,13 +39,13 @@ public class JobPostController {
     }
 
     @PostMapping()
-    public ResponseEntity<String> createJobPost(@RequestBody CreateJobPostRequest jobPost, Principal principal) {
+    public ResponseEntity<String> createJobPost(@Valid @RequestBody CreateJobPostRequest jobPost, Principal principal) {
         jobPostService.createJobPost(principal.getName(), jobPost);
         return ResponseEntity.ok("Job post created successfully");
     }
 
     @PutMapping()
-    public ResponseEntity<String> updateJobPost( @RequestBody UpdateJobPostRequest jobPost) {
+    public ResponseEntity<String> updateJobPost(@Valid @RequestBody UpdateJobPostRequest jobPost) {
         jobPostService.updateJobPost(jobPost);
         return ResponseEntity.ok("Job post updated successfully");
     }

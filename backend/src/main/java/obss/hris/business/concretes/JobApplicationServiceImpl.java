@@ -6,14 +6,15 @@ import obss.hris.business.abstracts.CandidateService;
 import obss.hris.business.abstracts.ElasticSearchService;
 import obss.hris.business.abstracts.JobApplicationService;
 import obss.hris.business.abstracts.JobPostService;
+import obss.hris.core.util.MailService;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.CandidateNotFoundException;
 import obss.hris.exception.JobPostNotFoundException;
 import obss.hris.model.entity.*;
-import obss.hris.model.request.CreateJobApplicationRequest;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetJobPostApplicationResponse;
 import obss.hris.repository.JobApplicationRepository;
+import org.apache.commons.text.similarity.JaccardSimilarity;
 import org.modelmapper.TypeMap;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @AllArgsConstructor
@@ -29,19 +32,43 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     private JobApplicationRepository jobApplicationRepository;
     private ModelMapperService modelMapperService;
     private ElasticSearchService elasticSearchService;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private MailService mailService;
+
     @Override
     public JobApplication createJobApplication(JobPost jobPost, Candidate candidate) {
         JobApplication newJobApplication = new JobApplication();
         newJobApplication.setCandidate(candidate);
         newJobApplication.setJobPost(jobPost);
+        newJobApplication.setEligibility(calculateScore(jobPost, candidate));
         this.jobApplicationRepository.save(newJobApplication);
         return newJobApplication;
     }
-
+    public void sa(){
+        List<JobApplication> jobs = jobApplicationRepository.findAll();
+        for(JobApplication jobApplication : jobs){
+            jobApplication.setEligibility(calculateScore(jobApplication.getJobPost(), jobApplication.getCandidate()));
+            jobApplicationRepository.save(jobApplication);
+        }
+    }
+    private Double calculateScore(JobPost jobPost, Candidate candidate){
+        JaccardSimilarity jaccardSimilarity = new JaccardSimilarity();
+        double totalScore = 0.0;
+        for (String skill : jobPost.getRequiredSkills()) {
+            double score = 0.0;
+            for (String candidateSkill : candidate.getSkills()) {
+                score = Math.max(score, jaccardSimilarity.apply(skill, candidateSkill));
+            }
+            totalScore += score;
+        }
+        if(totalScore == 0.0)
+            return 0.0;
+        return totalScore/jobPost.getRequiredSkills().size();
+    }
     @Override
     public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<JobApplication> jobApplications = jobApplicationRepository.findAllByJobPost_JobPostId(jobPostId, pageable);
+        List<JobApplication> jobApplications = jobApplicationRepository.findAllByJobPost_JobPostIdOrderByEligibilityDesc(jobPostId, pageable);
         return getMappedJobApplications(jobApplications);
     }
 
@@ -123,5 +150,14 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).orElseThrow(() -> new JobPostNotFoundException(jobApplicationId));
         jobApplication.setStatus(jobApplicationStatus);
         jobApplicationRepository.save(jobApplication);
+        sendMailWithNewThread(jobApplication.getCandidate().getEmail(), jobApplication.getJobPost().getTitle(), jobApplicationStatus.toString());
     }
+
+    private void sendMailWithNewThread(String to, String jobPostTitle, String status){
+        Runnable mailSendingTask = () -> {
+            mailService.sendMailForJobApplicationStatusChange(to, jobPostTitle, status);
+        };
+        executorService.submit(mailSendingTask);
+    }
+
 }

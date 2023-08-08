@@ -1,6 +1,17 @@
 import axios from "axios";
 
 export default class CandidateService {
+  async logout(token) {
+    return await axios.get(
+      process.env.REACT_APP_CANDIDATE_BASE_URL + "/logout",
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+  }
+
   async getCandidateProfile(token, candidateId) {
     if (!candidateId) {
       return await axios.get(process.env.REACT_APP_CANDIDATE_BASE_URL + `/me`, {

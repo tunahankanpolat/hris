@@ -2,11 +2,10 @@ import { Outlet } from "react-router-dom";
 import HumanResourceNavBar from "../components/NavBars/HumanResourceNavBar";
 import CandidateNavBar from "../components/NavBars/CandidateNavBar";
 import AnonymousNavBar from "../components/NavBars/AnonymousNavBar";
-import { useSelector } from "react-redux";
-
+import { getCandidate, getHumanResource } from "../store/storage";
 export default function Layout() {
-  const humanResource = useSelector((state) => state.humanResource.humanResource);
-  const candidate = useSelector((state) => state.candidate.candidate);
+  const humanResource = getHumanResource();
+  const candidate = getCandidate()
   let NavBarComponent = null;
   if (humanResource) {
     NavBarComponent = <HumanResourceNavBar />;

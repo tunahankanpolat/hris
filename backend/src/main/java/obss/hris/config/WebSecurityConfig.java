@@ -1,9 +1,11 @@
 package obss.hris.config;
 
 import lombok.AllArgsConstructor;
+import obss.hris.business.concretes.HttpCookieOAuth2AuthorizationRequestRepository;
 import obss.hris.business.concretes.LinkedinOAuth2UserService;
+import obss.hris.core.util.handler.OAuth2AuthenticationFailureHandler;
+import obss.hris.core.util.handler.OAuth2AuthenticationSuccessHandler;
 import obss.hris.core.util.handler.GenericExceptionHandler;
-import obss.hris.core.util.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -20,7 +23,7 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenRespon
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -35,10 +38,13 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @AllArgsConstructor
 public class WebSecurityConfig {
     private LinkedinOAuth2UserService linkedinOAuth2UserService;
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
     private CorsConfigurationSource corsConfigurationSource;
+    private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final String HR_ROLE = "HR_USER";
     private final String CANDIDATE_ROLE = "OAUTH2_USER";
     private final GenericExceptionHandler genericExceptionHandler;
@@ -49,12 +55,18 @@ public class WebSecurityConfig {
                 .csrf().disable()
                 .cors().configurationSource(corsConfigurationSource).and()
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/",
+                                "/error").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/logout").hasAuthority(CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.PUT,"/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/linkedin").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/hr/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/logout").hasAuthority(CANDIDATE_ROLE)
                         .requestMatchers(HttpMethod.GET,"/api/candidate/v1/login").hasAuthority(CANDIDATE_ROLE)
                         .requestMatchers(HttpMethod.POST,"/api/blacklist/v1/banCandidate").hasAnyAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.GET,"/api/candidate/v1/me").hasAuthority(CANDIDATE_ROLE)
                         .requestMatchers(HttpMethod.GET,"/api/hr/v1/me/**").hasAuthority(HR_ROLE)
-
+                        .requestMatchers(HttpMethod.GET,"logout").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.PUT,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
@@ -64,28 +76,42 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.PUT,"/api/jobApplications/v1/{jobApplicationId}/status").hasAuthority(HR_ROLE)
                         .requestMatchers(HttpMethod.DELETE,"/api/jobApplications/v1").hasAuthority(CANDIDATE_ROLE)
                         //.requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/scrape-skills").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/jobApplications/v1/sa").hasAuthority(CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/scrape/linkedin").hasAuthority(CANDIDATE_ROLE)
                         .requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAnyAuthority(HR_ROLE,CANDIDATE_ROLE)
                         .anyRequest().authenticated()
                 )
+                .sessionManagement(config -> {
+                    config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                })
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token
                                 -> token.accessTokenResponseClient(linkedinTokenResponseClient()))
+                        .authorizationEndpoint(authorization -> authorization
+                                .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                        )
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
+                                .successHandler(oAuth2AuthenticationSuccessHandler)
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(this.linkedinOAuth2UserService))
-                                .successHandler(jwtAuthenticationSuccessHandler)
+                                //.successHandler(jwtAuthenticationSuccessHandler)
                 ).formLogin(withDefaults())
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error_message\":\"" + authException.getMessage() + "\"}");
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpStatus.FORBIDDEN.value());
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error_message\":\"" + accessDeniedException.getMessage() + "\"}");
-                        }))
+//                .logout(logout -> logout
+//                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).permitAll()
+//                        .invalidateHttpSession(true)
+//                        .clearAuthentication(true)
+//                        .deleteCookies("JSESSIONID", "XSRF-TOKEN"))
+//                .exceptionHandling(exceptionHandling -> exceptionHandling
+//                        .authenticationEntryPoint((request, response, authException) -> {
+//                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//                            response.setContentType("application/json");
+//                            response.getWriter().write("{\"error_message\":\"" + authException.getMessage() + "\"}");
+//                        })
+//                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+//                            response.setStatus(HttpStatus.FORBIDDEN.value());
+//                            response.setContentType("application/json");
+//                            response.getWriter().write("{\"error_message\":\"" + accessDeniedException.getMessage() + "\"}");
+//                        }))
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

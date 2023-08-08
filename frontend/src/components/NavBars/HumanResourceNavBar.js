@@ -7,9 +7,10 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import SearchBar from "../SearchBar";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { setHumanResource } from "../../store/storage";
 export default function HumanResourceNavBar() {
   const handleLogout = async () => {
-    localStorage.removeItem("humanResource");
+    setHumanResource();
     window.location.href = "/";
   }
   const navigate = useNavigate();

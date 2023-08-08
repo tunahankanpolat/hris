@@ -1,7 +1,7 @@
 import { useState } from "react";
 import JobPostService from "../services/jobPostService";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { getHumanResource } from "../store/storage";
 
 export default function JobPostCreate() {
   const [company, setCompany] = useState("");
@@ -12,9 +12,7 @@ export default function JobPostCreate() {
   const [closureTime, setClosureTime] = useState("");
   const [requiredSkills, setRequiredSkills] = useState([]);
   const [newSkill, setNewSkill] = useState("");
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   // Form submit işlemi
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,10 +30,12 @@ export default function JobPostCreate() {
     jobPostService
       .createJobPost(humanResource.token, jobPost)
       .then((result) => {
+        debugger;
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data);
+        debugger;
+        toast.error(err.response.data.error_message.toString());
       });
   };
   // Yeni beceri ekleme işlemi
@@ -165,7 +165,7 @@ export default function JobPostCreate() {
                 Aktif Olma Tarihi
               </label>
               <input
-                type="datetime-local"
+                type="date"
                 id="activationTime"
                 value={activationTime}
                 onChange={(e) => setActivationTime(e.target.value)}

@@ -5,23 +5,21 @@ import jakarta.servlet.http.HttpSession;
 import obss.hris.business.abstracts.*;
 import obss.hris.core.util.jwt.JwtUtils;
 import obss.hris.core.util.mapper.ModelMapperService;
-import obss.hris.exception.CandidateBannedException;
 import obss.hris.exception.CandidateNotFoundException;
-import obss.hris.exception.JobPostNotFoundException;
+import obss.hris.exception.LinkedinScrapeException;
 import obss.hris.model.entity.*;
 import obss.hris.model.response.*;
 import obss.hris.repository.CandidateRepository;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -34,30 +32,36 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     private ModelMapperService modelMapperService;
     private CandidateRepository candidateRepository;
     private JwtUtils jwtUtils;
-    private WebDriver webDriver;
     private JobApplicationService jobApplicationService;
     private ElasticSearchService elasticSearchService;
-    @Value("${linkedin.login-url}")
-    private String linkedinLoginUrl;
+    private LinkedinOAuth2UserService linkedinOAuth2UserService;
+    @Value("${linkedin.scrape-url}")
+    private String linkedinScrapeUrl;
 
-    @Value("${linkedin.account-email}")
-    private String linkedinAccountEmail;
 
-    @Value("${linkedin.account-password}")
-    private String linkedinAccountPassword;
-
-    public CandidateServiceImpl(ModelMapperService modelMapperService, CandidateRepository candidateRepository, JwtUtils jwtUtils, WebDriver webDriver, JobApplicationService jobApplicationService, ElasticSearchService elasticSearchService) {
+    public CandidateServiceImpl(ModelMapperService modelMapperService, CandidateRepository candidateRepository, JwtUtils jwtUtils, JobApplicationService jobApplicationService, ElasticSearchService elasticSearchService, LinkedinOAuth2UserService linkedinOAuth2UserService) {
         this.modelMapperService = modelMapperService;
         this.candidateRepository = candidateRepository;
         this.jwtUtils = jwtUtils;
-        this.webDriver = webDriver;
         this.jobApplicationService = jobApplicationService;
         this.elasticSearchService = elasticSearchService;
+        this.linkedinOAuth2UserService = linkedinOAuth2UserService;
+    }
+
+    public void createCandidateIfNotExist(OAuth2User oauth2User){
+        Candidate candidate = getCandidateByLinkedinId(oauth2User.getName());
+        if(candidate == null){
+            Map<String,Object> attributes = oauth2User.getAttributes();
+            candidate = this.modelMapperService.forCreate().map(attributes, Candidate.class);
+            this.candidateRepository.save(candidate);
+            elasticSearchService.saveCandidate(modelMapperService.forCreate().map(candidate, ElkCandidate.class));
+        }
     }
 
     @Override
-    public Candidate createCandidate(Candidate candidate) {
-        return candidateRepository.save(candidate);
+    public ResponseEntity<String> logout(OAuth2AuthorizedClient authorizedClient) {
+        return linkedinOAuth2UserService.revokeUser(authorizedClient).getBody() != null ?
+                ResponseEntity.ok("Logout Successful") : ResponseEntity.badRequest().body("Logout Failed");
     }
 
     @Override
@@ -79,38 +83,45 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     }
 
     @Override
-    public LoginResponse scrapeSkillsAndCreateCandidateIfNotExist(String linkedinUrl, HttpServletRequest request) {
-        OAuth2User oauth2User = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Map<String,Object> attributes = oauth2User.getAttributes();
-        Candidate candidate = this.candidateRepository.findByLinkedinId(oauth2User.getName());
-        if(candidate == null){
-            candidate = this.modelMapperService.forCreate().map(attributes, Candidate.class);
-            CandidateScrapeResponse scrapeResponse = getUserDataUsingScraping(linkedinUrl);
-            candidate.setSkills(scrapeResponse.getSkills());
-            candidate.setAbout(scrapeResponse.getAbout());
-            candidateRepository.save(candidate);
-            elasticSearchService.saveCandidate(modelMapperService.forCreate().map(candidate, ElkCandidate.class));
-        }
-        return getCandidateLoginResponse(request);
-    }
-
-    @Override
-    public LoginResponse login(HttpServletRequest request) {
-        OAuth2User oauth2User = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Candidate candidate = this.candidateRepository.findByLinkedinId(oauth2User.getName());
+    public String scrapeLinkedinProfile(String linkedinUrl, OAuth2User oauth2User) {
+        Candidate candidate = getCandidateByLinkedinId(oauth2User.getName());
         if(candidate == null){
             throw new CandidateNotFoundException();
         }
-        return getCandidateLoginResponse(request);
+        if(candidate.getAbout() != null || !candidate.getSkills().isEmpty()){
+            return "Bilgileriniz zaten linkedin'den çekildi.";
+        }
+        RestTemplate restTemplate = new RestTemplate();
+        String requestUrl = linkedinScrapeUrl + "?linkedinUrl=" + linkedinUrl;
+        ResponseEntity<CandidateScrapeResponse> response = restTemplate.getForEntity(requestUrl, CandidateScrapeResponse.class);
+        if(response.getStatusCode() != ResponseEntity.ok().build().getStatusCode()){
+            throw new LinkedinScrapeException(linkedinUrl);
+        }
+        CandidateScrapeResponse scrapeResponse = response.getBody();
+        boolean isCandidateUpdated = false;
+        if(scrapeResponse.getAbout() != null){
+            candidate.setAbout(scrapeResponse.getAbout());
+            isCandidateUpdated = true;
+        }
+        if(scrapeResponse.getSkills() != null && !scrapeResponse.getSkills().isEmpty()){
+            for (String skill : scrapeResponse.getSkills()) {
+                candidate.getSkills().add(skill);
+            }
+            isCandidateUpdated = true;
+        }
+        if(isCandidateUpdated)
+            candidateRepository.save(candidate);
+        return "Başarılı bir şekilde bilgileriniz güncellendi.";
     }
 
-    private LoginResponse getCandidateLoginResponse(HttpServletRequest request) {
+    @Override
+    public LoginResponse login(OAuth2User oauth2User) {
+        return getCandidateLoginResponse();
+    }
+
+    private LoginResponse getCandidateLoginResponse() {
         String token = jwtUtils.generateToken(SecurityContextHolder.getContext().getAuthentication());
         LoginResponse loginResponse = new LoginResponse(token);
-        HttpSession session = request.getSession(false);
-        if(session != null) {
-            session.invalidate(); // Session'ı sonlandır
-        }
         return loginResponse;
     }
 
@@ -152,36 +163,36 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
 
 
 
-    private CandidateScrapeResponse getUserDataUsingScraping(String linkedinUrl){
-        webDriver.get(linkedinLoginUrl);
-
-        String currentUrl = webDriver.getCurrentUrl();
-        if(currentUrl.contains("/login")){
-            WebElement username = webDriver.findElement(By.id("username"));
-            username.sendKeys(linkedinAccountEmail);
-            WebElement password = webDriver.findElement(By.id("password"));
-            password.sendKeys(linkedinAccountPassword);
-            WebElement form = webDriver.findElement(By.xpath("//form[@class='login__form']"));
-            form.submit();
-        }
-        webDriver.get(linkedinUrl);
-        WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
-        try{
-            List<String> skills =  wait.until(webDriver ->
-                    Arrays.stream(
-                            webDriver.findElement(By.cssSelector("#skills+div+div"))
-                                    .getText().split("\n")).distinct().toList());
-            String about =  wait.until(webDriver ->
-                    webDriver.findElement(By.cssSelector("#about+div+div"))
-                            .getText().split("\n"))[0];
-            return new CandidateScrapeResponse(skills,about);
-        }catch (Exception e){
-            return new CandidateScrapeResponse();
-        }
-    }
+//    private CandidateScrapeResponse getUserDataUsingScraping(String linkedinUrl){
+//        webDriver.get(linkedinLoginUrl);
+//
+//        String currentUrl = webDriver.getCurrentUrl();
+//        if(currentUrl.contains("/login")){
+//            WebElement username = webDriver.findElement(By.id("username"));
+//            username.sendKeys(linkedinAccountEmail);
+//            WebElement password = webDriver.findElement(By.id("password"));
+//            password.sendKeys(linkedinAccountPassword);
+//            WebElement form = webDriver.findElement(By.xpath("//form[@class='login__form']"));
+//            form.submit();
+//        }
+//        webDriver.get(linkedinUrl);
+//        WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+//        try{
+//            List<String> skills =  wait.until(webDriver ->
+//                    Arrays.stream(
+//                            webDriver.findElement(By.cssSelector("#skills+div+div"))
+//                                    .getText().split("\n")).distinct().toList());
+//            String about =  wait.until(webDriver ->
+//                    webDriver.findElement(By.cssSelector("#about+div+div"))
+//                            .getText().split("\n"))[0];
+//            return new CandidateScrapeResponse(skills,about);
+//        }catch (Exception e){
+//            return new CandidateScrapeResponse();
+//        }
+//    }
     @Override
     public OAuth2User loadUserByUsername(String linkedinId) {
-        Candidate candidate = candidateRepository.findByLinkedinId(linkedinId);
+        Candidate candidate = getCandidateByLinkedinId(linkedinId);
         if (candidate != null) {
             return new DefaultOAuth2User(
                     Arrays.asList(new SimpleGrantedAuthority("OAUTH2_USER")),

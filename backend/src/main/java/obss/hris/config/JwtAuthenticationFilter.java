@@ -1,4 +1,4 @@
-package obss.hris.core.util.jwt;
+package obss.hris.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.CustomOAuth2UserService;
 import obss.hris.business.abstracts.LdapHumanResourceService;
+import obss.hris.core.util.jwt.JwtUtils;
 import obss.hris.model.LdapPeople;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

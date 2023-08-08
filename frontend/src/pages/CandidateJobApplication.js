@@ -3,15 +3,13 @@ import JobPostDetail from "../components/JobPostDetail";
 import Pagination from "../components/Pagination";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import CandidateService from "../services/candidateService";
+import { getCandidate, getHumanResource } from "../store/storage";
 
 export default function CandidateJobApplication() {
   let { id } = useParams();
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
-  const candidate = useSelector((state) => state.candidate.candidate);
+  const humanResource = getHumanResource();
+  const candidate = getCandidate();
 
   const [page, setPage] = useState(0);
   const [currentJobPost, setCurrentJobPost] = useState(false);

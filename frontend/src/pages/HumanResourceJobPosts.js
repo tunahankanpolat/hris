@@ -2,14 +2,12 @@ import { useState, useEffect } from "react";
 import JobPostCard from "../components/JobPostCard";
 import JobPostDetailForUpdate from "../components/JobPostDetailForUpdate";
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import Pagination from "../components/Pagination";
 import HumanResourceService from "../services/humanResouceService";
+import { getHumanResource } from "../store/storage";
 
 export default function HumanResouceJobPosts() {
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   const [jobPosts, setJobPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [currentJobPost, setCurrentJobPost] = useState(false);

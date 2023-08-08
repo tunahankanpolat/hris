@@ -2,17 +2,19 @@ package obss.hris.business.abstracts;
 
 import jakarta.servlet.http.HttpServletRequest;
 import obss.hris.model.entity.Candidate;
-import obss.hris.model.response.CandidateLoginResponse;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetCandidateResponse;
 import obss.hris.model.response.LoginResponse;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.List;
 
 public interface CandidateService {
-
-    Candidate createCandidate(Candidate candidate);
+    void createCandidateIfNotExist(OAuth2User oauth2User);
+    ResponseEntity<String> logout(OAuth2AuthorizedClient authorizedClient);
 
     Candidate getCandidateByLinkedinId(String linkedinId);
 
@@ -20,9 +22,9 @@ public interface CandidateService {
 
     Candidate getCandidateById(Long candidateId);
 
-    LoginResponse scrapeSkillsAndCreateCandidateIfNotExist(String linkedinUrl, HttpServletRequest request);
+    String scrapeLinkedinProfile(String linkedinUrl, OAuth2User oauth2User);
 
-    LoginResponse login(HttpServletRequest request);
+    LoginResponse login(@AuthenticationPrincipal OAuth2User oauth2User);
 
     void setCandidateAsBanned(Candidate candidate);
 

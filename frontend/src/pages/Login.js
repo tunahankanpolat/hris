@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import HumanResourceService from "../services/humanResouceService";
-import { setHumanResource } from "../store/humanResource";
+import { setHumanResource } from "../store/storage";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,8 +13,10 @@ export default function Login() {
     await humanResourceService
       .login(username, password)
       .then((res) => {
-        dispatch(setHumanResource(res.data));
-        navigate(location.state?.return_url || "/job-posts");
+        setHumanResource(res.data);
+        setTimeout(() => {
+          window.location.href = "/job-posts";
+          }, 1000);
         toast.success("Giriş Başarılı");
       })
       .catch((err) => {

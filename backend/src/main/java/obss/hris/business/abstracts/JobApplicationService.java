@@ -4,7 +4,6 @@ import obss.hris.model.entity.Candidate;
 import obss.hris.model.entity.JobApplication;
 import obss.hris.model.entity.JobApplicationStatus;
 import obss.hris.model.entity.JobPost;
-import obss.hris.model.request.CreateJobApplicationRequest;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetJobPostApplicationResponse;
 
@@ -25,4 +24,5 @@ public interface JobApplicationService {
     List<JobApplication> getCandidateJobApplications(Long candidateId);
     void batchUpdateStatus(List<JobApplication> jobApplications, JobApplicationStatus jobApplicationStatus);
 
+    void sa();
 }

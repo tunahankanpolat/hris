@@ -14,7 +14,7 @@ export default class JobPostService {
 
   async applyToJobPost(token, jobPostId) {
     return await axios.post(
-      process.env.REACT_APP_JOB_POSTS_URL + `/${jobPostId}`,
+      process.env.REACT_APP_JOB_POSTS_URL + `/${jobPostId}/apply`,
       {},
       {
         headers: {

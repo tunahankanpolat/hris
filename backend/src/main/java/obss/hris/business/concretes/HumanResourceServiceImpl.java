@@ -91,17 +91,6 @@ public class HumanResourceServiceImpl implements HumanResourceService {
         }
 
     }
-    @Override
-    public List<GetJobPostResponse> getJobPostsByPage(String userName, int page, int size) {
-        HumanResource humanResource = getByUserName(userName);
-        List<JobPost> jobPosts = humanResource.getJobPosts();
-        int totalApplications = jobPosts.size();
-        int startIndex = page * size;
-        int endIndex = Math.min(startIndex + size, totalApplications);
-        List<JobPost> pagedApplications = jobPosts.subList(startIndex, endIndex);
-        return pagedApplications.stream().map(jobPost ->
-                modelMapperService.forResponse().map(jobPost, GetJobPostResponse.class)).toList();
-    }
 
     private void createHumanResourceIfNoExist(LdapPeople ldapPeople) {
         HumanResource humanResource = humanResourceRepository.findByUserName(ldapPeople.getUsername());

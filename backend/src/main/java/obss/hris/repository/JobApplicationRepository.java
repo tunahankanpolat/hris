@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface JobApplicationRepository extends JpaRepository<JobApplication,Long> {
-    List<JobApplication> findAllByJobPost_JobPostId(Long jobPostId, Pageable pageable);
+    List<JobApplication> findAllByJobPost_JobPostIdOrderByEligibilityDesc(Long jobPostId, Pageable pageable);
     List<JobApplication> findAllByCandidate_CandidateId(Long candidateId, Pageable pageable);
     List<JobApplication> findAllByCandidate_CandidateId(Long candidateId);
     List<JobApplication> findAllByJobPost_JobPostIdAndStatus(Long jobPostId, JobApplicationStatus jobApplicationStatus, Pageable pageable);

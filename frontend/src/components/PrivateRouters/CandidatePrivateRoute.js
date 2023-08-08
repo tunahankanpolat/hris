@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { getCandidate } from "../../store/storage";
 export default function CandidatePrivateRoute({children}) {
-  const candidate = useSelector((state) => state.candidate.candidate);
+  const candidate = getCandidate();
   const location = useLocation();
 
   if (!candidate) {

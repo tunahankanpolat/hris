@@ -12,6 +12,7 @@ import JobPostCreate from "./pages/JobPostCreate";
 import Layout from "./layouts/Layout";
 import CandidatePrivateRoute from "./components/PrivateRouters/CandidatePrivateRoute";
 import CandidateSearch from "./pages/CandidateSearch";
+import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler ";
 const routes = [
   {
     path: "/",
@@ -36,7 +37,7 @@ const routes = [
         path: "search/candidate/:keyword",
         element: <CandidateSearch />,
         humanResourceAuth: true,
-      },
+      }
     ],
   },
   {
@@ -97,9 +98,9 @@ const routes = [
     element: <CandidateScrape />,
   },
   {
-    path: "/candidate/auth/success",
-    element: <CandidateAuthSuccess />,
-  },
+    path: "oauth2/redirect",
+    element: <OAuth2RedirectHandler/>
+  }
   // {
   //     path: '/human-resource/job-posts',
   //     element: <HumanResouceJobPosts/>

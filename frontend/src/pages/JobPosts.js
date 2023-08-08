@@ -1,14 +1,29 @@
 import JobPostCard from "../components/JobPostCard";
 import JobPostDetail from "../components/JobPostDetail";
 import Pagination from "../components/Pagination";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import JobPostService from "../services/jobPostService";
-
+import { toast } from "react-toastify";
+import { getCandidate } from "../store/storage";
 export default function JobPosts() {
   const [jobPosts, setJobPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [currentJobPost, setCurrentJobPost] = useState(false);
+
+  const candidate = getCandidate();
+  const handleApply = () => {
+    let jobPostService = new JobPostService();
+    jobPostService.
+    applyToJobPost(candidate.token, currentJobPost.jobPostId)
+    .then((result) => {
+      debugger;
+      toast.success(result.data);
+    }).catch((err) => {
+      debugger;
+      toast.error(err.response.data.error_message);
+    })
+  }
+
   useEffect(() => {
     let jobPostService = new JobPostService();
     jobPostService
@@ -59,7 +74,7 @@ export default function JobPosts() {
 
       <div className="w-1/2 bg-white h-full border shadaow pt-8 overflow-auto">
         {currentJobPost && (
-          <JobPostDetail isApplied={false} {...currentJobPost} />
+          <JobPostDetail {...currentJobPost} handleApply={handleApply} />
         )}
       </div>
     </main>

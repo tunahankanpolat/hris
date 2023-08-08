@@ -1,16 +1,17 @@
 package obss.hris.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.HumanResourceService;
 import obss.hris.business.abstracts.JobPostService;
 import obss.hris.model.entity.JobApplicationStatus;
-import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.HumanResourceLoginRequest;
-import obss.hris.model.request.UpdateJobPostRequest;
-import obss.hris.model.response.*;
+import obss.hris.model.response.GetHumanResourceResponse;
+import obss.hris.model.response.GetJobPostApplicationResponse;
+import obss.hris.model.response.GetJobPostResponse;
+import obss.hris.model.response.LoginResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -42,7 +43,7 @@ public class HumanResourceController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<LoginResponse> login(@RequestBody HumanResourceLoginRequest humanResourceLoginRequest, HttpServletRequest request){
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody HumanResourceLoginRequest humanResourceLoginRequest, HttpServletRequest request){
         return ResponseEntity.ok(humanResourceService.login(humanResourceLoginRequest, request));
     }
 }

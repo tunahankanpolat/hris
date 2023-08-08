@@ -9,7 +9,7 @@ import java.sql.Date;
 @Entity
 @Getter
 @Setter
-@Table(name = "job_applications")
+@Table(name = "job_applications", uniqueConstraints = @UniqueConstraint(columnNames = {"job_post_id", "candidate_id"}))
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobApplication {
@@ -32,4 +32,7 @@ public class JobApplication {
     @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
+
+    @Column(name = "eligibility")
+    private Double eligibility;
 }

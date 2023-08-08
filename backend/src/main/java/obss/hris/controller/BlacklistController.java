@@ -1,5 +1,6 @@
 package obss.hris.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.BlacklistService;
 import obss.hris.model.request.BanRequest;
@@ -18,7 +19,7 @@ public class BlacklistController {
 
     @PostMapping("banCandidate")
     @Transactional
-    public ResponseEntity<String> banCandidate(@RequestBody BanRequest banRequest) {
+    public ResponseEntity<String> banCandidate(@Valid @RequestBody BanRequest banRequest) {
         blacklistService.banCandidate(banRequest);
         return ResponseEntity.ok("Candidate banned successfully");
     }

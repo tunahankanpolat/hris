@@ -3,13 +3,11 @@ import ChecklistIcon from "@mui/icons-material/Checklist";
 import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import LaunchIcon from "@mui/icons-material/Launch";
-import ClearIcon from "@mui/icons-material/Clear";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
 import LinkedinLoginButton from "./LinkedinLoginButton";
+import { getCandidate } from "../store/storage";
 
 export default function JobPostDetail(props) {
-  const candidate = useSelector((state) => state.candidate.candidate);
+  const candidate = getCandidate();
   return (
     <div className="w-full h-full flex flex-col px-7 gap-12">
       <div>
@@ -49,15 +47,9 @@ export default function JobPostDetail(props) {
       </div>
 
       {candidate ? (
-        props.isApplied ? (
-          <div className="cursor-pointer bg-zinc-600 rounded-full w-40 pt-2 pb-3 text-white flex text-center opacity-90 hover:opacity-100 transition-opacity">
-            <ClearIcon className="mx-3 w-1/2 h-1/2" /> Başvuruyu Sil
-          </div>
-        ) : (
-          <div className="cursor-pointer bg-obss-blue rounded-full w-36 pt-2 pb-3 text-white flex text-center opacity-90 hover:opacity-100 transition-opacity">
-            <LaunchIcon className="mx-3 w-1/2 h-1/2" /> Başvur
-          </div>
-        )
+        <button onClick={props.handleApply} className="cursor-pointer justify-center bg-obss-blue rounded-full w-36 pt-2 pb-3 text-white flex opacity-90 hover:opacity-100 transition-opacity">
+          <LaunchIcon className="mr-1 w-1/2 h-1/2 translate-y-0.5" /> Başvur
+        </button>
       ) : (
         <LinkedinLoginButton />
       )}

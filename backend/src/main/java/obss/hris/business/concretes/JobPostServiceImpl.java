@@ -1,25 +1,23 @@
 package obss.hris.business.concretes;
 
 import lombok.AllArgsConstructor;
-import obss.hris.business.abstracts.HumanResourceService;
 import obss.hris.business.abstracts.JobApplicationService;
 import obss.hris.business.abstracts.JobPostService;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.CandidateBannedException;
 import obss.hris.exception.JobPostNotFoundException;
-import obss.hris.model.entity.*;
+import obss.hris.model.entity.Candidate;
+import obss.hris.model.entity.HumanResource;
+import obss.hris.model.entity.JobPost;
 import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.UpdateJobPostRequest;
-import obss.hris.model.response.GetJobPostApplicationResponse;
 import obss.hris.model.response.GetJobPostResponse;
-import obss.hris.repository.JobApplicationRepository;
 import obss.hris.repository.JobPostRepository;
-import org.modelmapper.TypeMap;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -36,7 +34,7 @@ public class JobPostServiceImpl implements JobPostService {
     public List<GetJobPostResponse> jobPostsByPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        List<JobPost> jobPosts = jobPostRepository.findAllByIsActiveTrue(pageable);
+        List<JobPost> jobPosts = jobPostRepository.findAllActiveJobPosts(pageable);
         return jobPosts.stream().map(jobPost ->
                 modelMapperService.forResponse().map(jobPost, GetJobPostResponse.class)).toList();
     }
@@ -69,9 +67,6 @@ public class JobPostServiceImpl implements JobPostService {
     public JobPost createJobPost(String userName, CreateJobPostRequest jobPost) {
         JobPost newJobPost = modelMapperService.forRequest().map(jobPost, JobPost.class);
         HumanResource humanResource = humanResourceService.getByUserName(userName);
-        if (jobPost.getActivationTime().toLocalDate().compareTo(LocalDate.now()) <= 0) {
-            newJobPost.setActive(true);
-        }
         newJobPost.setHumanResource(humanResource);
         newJobPost.setCode(generateJobPostCode(jobPost));
         jobPostRepository.save(newJobPost);
@@ -82,6 +77,11 @@ public class JobPostServiceImpl implements JobPostService {
     public JobPost updateJobPost(UpdateJobPostRequest jobPost) {
         JobPost existingJobPost = getJobPostById(jobPost.getJobPostId());
         existingJobPost.updateJobPost(jobPost);
+        if(jobPost.isActive() && !existingJobPost.getActive())
+            existingJobPost.setClosureTime(Date.valueOf(LocalDate.now().plusDays(10)));
+        else if(!jobPost.isActive() && existingJobPost.getActive())
+            existingJobPost.setClosureTime(Date.valueOf(LocalDate.now()));
+
         jobPostRepository.save(existingJobPost);
         return existingJobPost;
     }

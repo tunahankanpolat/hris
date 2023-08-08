@@ -4,9 +4,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -30,6 +29,9 @@ import java.util.Map;
 public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
     @Value("${linkedin.email.api}")
     private String userEmailUri;
+
+    @Value("${linkedin.revoke.api}")
+    private String revokeUri;
     private static final String INVALID_USER_INFO_RESPONSE_ERROR_CODE = "invalid_user_info_response";
 
     private static final ParameterizedTypeReference<Map<String, Object>> PARAMETERIZED_RESPONSE_TYPE = new ParameterizedTypeReference<Map<String, Object>>() {};
@@ -44,6 +46,24 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         this.restOperations = restTemplate;
     }
+
+    public ResponseEntity<String> revokeUser(OAuth2AuthorizedClient authorizedClient){
+        String clientId = authorizedClient.getClientRegistration().getClientId();
+        String clientSecret = authorizedClient.getClientRegistration().getClientSecret();
+        String token = authorizedClient.getAccessToken().getTokenValue();
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("client_id", clientId);
+        requestBody.add("client_secret", clientSecret);
+        requestBody.add("token", token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<?> request = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restOperations.exchange(revokeUri, HttpMethod.POST, request, String.class);
+        String body = response.getStatusCode() == HttpStatus.OK ? "Başarılı bir şekilde çıkış yapıldı." : "Çıkış yapılırken bir hata oluştu.";
+        return ResponseEntity.status(response.getStatusCode()).body(body);
+    }
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User oAuth2User = super.loadUser(userRequest);

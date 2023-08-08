@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import CandidateService from "../services/candidateService";
-import { useDispatch } from "react-redux";
-import { setCandidate } from "../store/candidate";
+import { setCandidate } from "../store/storage";
 import { toast } from "react-toastify";
 axios.defaults.withCredentials = true;
 
@@ -13,7 +12,6 @@ const CandidateScrape = () => {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +21,7 @@ const CandidateScrape = () => {
       .scrapeSkills(url)
       .then((res) => {
         setLoading(false);
-        dispatch(setCandidate(res.data));
+        setCandidate(res.data);
         navigate("/candidate/auth/success");
       })
       .catch((err) => {

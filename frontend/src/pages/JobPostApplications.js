@@ -6,12 +6,11 @@ import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
 import BlockIcon from "@mui/icons-material/Block";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 import SearchBar from "../components/SearchBar";
 import JobApplicationService from "../services/jobApplicationService";
 import { toast } from "react-toastify";
 import HumanResourceService from "../services/humanResouceService";
-import SearchService from "../services/searchService";
+import { getHumanResource } from "../store/storage";
 
 export default function JobPostApplications() {
   const { id } = useParams();
@@ -19,9 +18,7 @@ export default function JobPostApplications() {
   const [searchKeyword, setSearchKeyword] = useState(false);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState(false);
-  const humanResource = useSelector(
-    (state) => state.humanResource.humanResource
-  );
+  const humanResource = getHumanResource();
   const getJobPostApplications = () => {
     let humanResouceService = new HumanResourceService();
     humanResouceService
