@@ -1,11 +1,8 @@
 package obss.hris.business.abstracts;
 
-import obss.hris.model.entity.HumanResource;
-import obss.hris.model.entity.JobApplicationStatus;
 import obss.hris.model.entity.JobPost;
 import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.UpdateJobPostRequest;
-import obss.hris.model.response.GetJobPostApplicationResponse;
 import obss.hris.model.response.GetJobPostResponse;
 
 import java.util.List;

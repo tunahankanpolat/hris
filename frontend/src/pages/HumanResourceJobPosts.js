@@ -20,12 +20,8 @@ export default function HumanResouceJobPosts() {
       humanResouceService
         .getJobPosts(humanResource.token, page, process.env.REACT_APP_PAGE_SIZE)
         .then((result) => {
-          debugger;
           setJobPosts(result.data);
           setCurrentJobPost(result.data[0]);
-        })
-        .catch((err) => {
-          console.log(err);
         });
     }
   }, []);
@@ -40,9 +36,6 @@ export default function HumanResouceJobPosts() {
           setJobPosts(result.data);
           setCurrentJobPost(result.data[0]);
         }
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
   const updateJobPost = (updatedJobPost) => {
@@ -61,7 +54,7 @@ export default function HumanResouceJobPosts() {
         (jobPost) => jobPost.jobPostId !== deletedJobPost.jobPostId
       )
     );
-    setCurrentJobPost(null); // Clear the currentJobPost when the corresponding job post is deleted
+    setCurrentJobPost(null);
   };
   return (
     <main className="wrapper flex bg-job-posts-background pl-48 pr-48">

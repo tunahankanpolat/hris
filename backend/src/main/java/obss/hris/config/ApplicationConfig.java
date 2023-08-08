@@ -19,11 +19,6 @@ public class ApplicationConfig {
         return new ModelMapper();
     }
 
-//    @Bean
-//    WebDriver webDriver() {
-//        return new ChromeDriver();
-//    }
-
     @Bean
     public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
         return new HttpCookieOAuth2AuthorizationRequestRepository();

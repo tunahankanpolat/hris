@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import HumanResourceService from "../services/humanResouceService";
-import { setHumanResource } from "../store/storage";
+import { setCandidate, setHumanResource } from "../store/storage";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +13,7 @@ export default function Login() {
       .login(username, password)
       .then((res) => {
         setHumanResource(res.data);
+        setCandidate();
         setTimeout(() => {
           window.location.href = "/job-posts";
           }, 1000);

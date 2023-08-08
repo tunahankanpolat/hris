@@ -1,12 +1,9 @@
 package obss.hris.business.abstracts;
 
-import jakarta.servlet.http.HttpServletRequest;
 import obss.hris.model.entity.Candidate;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetCandidateResponse;
-import obss.hris.model.response.LoginResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -23,8 +20,6 @@ public interface CandidateService {
     Candidate getCandidateById(Long candidateId);
 
     String scrapeLinkedinProfile(String linkedinUrl, OAuth2User oauth2User);
-
-    LoginResponse login(@AuthenticationPrincipal OAuth2User oauth2User);
 
     void setCandidateAsBanned(Candidate candidate);
 

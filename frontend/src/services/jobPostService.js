@@ -13,9 +13,8 @@ export default class JobPostService {
   }
 
   async applyToJobPost(token, jobPostId) {
-    return await axios.post(
+    return await axios.get(
       process.env.REACT_APP_JOB_POSTS_URL + `/${jobPostId}/apply`,
-      {},
       {
         headers: {
           Authorization: "Bearer " + token,

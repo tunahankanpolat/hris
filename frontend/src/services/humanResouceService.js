@@ -25,7 +25,6 @@ export default class HumanResourceService {
     searchKeyword
   ) {
     let apiUrl = `${process.env.REACT_APP_HUMAN_RESOURCE_JOB_POSTS_URL}/${jobPostId}/jobApplications/${page}/${size}`;
-    debugger;
     if (status || searchKeyword) {
       apiUrl += "?";
       if (status) {

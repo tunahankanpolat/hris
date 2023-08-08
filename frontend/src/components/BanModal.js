@@ -6,13 +6,6 @@ const BanModal = ({ onClose, candidateId}) => {
   const [reason, setReason] = useState('');
   const humanResource = getHumanResource();
   const handleBan = () => {
-    debugger;
-    // Axios isteği burada gerçekleştirilecek
-    // Backend ile iletişim sağlanacak
-    // Örnek olarak, burada bir fake API çağrısı yapacağız
-    // Axios'u projenize dahil etmeyi unutmayın
-    // axios.post('/api/ban', { reason }).then(() => {
-    // });
     let banRequest = {
       reason: reason,
       id: candidateId
@@ -20,9 +13,7 @@ const BanModal = ({ onClose, candidateId}) => {
     let blacklistService = new BlacklistService();
     blacklistService.addBlacklist(humanResource.token,banRequest).then((res) => {
       toast.success(res.data);
-      debugger;
     }).catch((err) => {
-      debugger;
       toast.error(err.response.data.error_message);
     });
     onClose();

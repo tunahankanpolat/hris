@@ -30,10 +30,15 @@ export default class CandidateService {
       );
     }
   }
-  async scrapeSkills(linkedinUrl) {
-    return await axios.get(
+  scrapeLinkedinProfile(token, linkedinUrl) {
+    return axios.get(
       process.env.REACT_APP_CANDIDATE_SCRAPE_SKILLS_URL +
-        `?linkedinUrl=${linkedinUrl}`
+        `?linkedinUrl=${linkedinUrl}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
   }
   async getJobApplications(token, page, size, candidateId) {
@@ -58,9 +63,5 @@ export default class CandidateService {
         }
       );
     }
-  }
-
-  async login() {
-    return await axios.get(process.env.REACT_APP_CANDIDATE_LOGIN_URL);
   }
 }

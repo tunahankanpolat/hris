@@ -1,7 +1,6 @@
 import JobPosts from "./pages/JobPosts";
 import Login from "./pages/Login";
 import CandidateScrape from "./pages/CandidateScrape";
-import CandidateAuthSuccess from "./pages/CandidateAuthSuccess.js";
 import HumanResourcePrivateRoute from "./components/PrivateRouters/HumanResourcePrivateRoute";
 import PublicPrivateRoute from "./components/PrivateRouters/PublicPrivateRoute";
 import HumanResouceJobPosts from "./pages/HumanResourceJobPosts";
@@ -85,14 +84,6 @@ const routes = [
       },
     ],
   },
-  // {
-  //     path: 'candidate/:id',
-  //     element: <CandidateProfile/>
-  // },
-  // {
-  //     path: 'candidate/:id/job-applications',
-  //     element: <CandidateJobApplication/>
-  // },
   {
     path: "candidate/scrape/skills",
     element: <CandidateScrape />,
@@ -101,14 +92,6 @@ const routes = [
     path: "oauth2/redirect",
     element: <OAuth2RedirectHandler/>
   }
-  // {
-  //     path: '/human-resource/job-posts',
-  //     element: <HumanResouceJobPosts/>
-  // },
-  // {
-  //     path: '/human-resource/job-posts/:id/job-applications',
-  //     element: <JobPostApplications/>
-  // },
 ];
 
 const authCheck = (routes) =>

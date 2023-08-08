@@ -1,7 +1,6 @@
 package obss.hris.business.abstracts;
 
 import obss.hris.model.entity.ElkCandidate;
-import obss.hris.model.response.GetCandidateResponse;
 
 import java.util.List;
 

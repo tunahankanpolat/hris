@@ -13,7 +13,6 @@ export default function JobPostCreate() {
   const [requiredSkills, setRequiredSkills] = useState([]);
   const [newSkill, setNewSkill] = useState("");
   const humanResource = getHumanResource();
-  // Form submit işlemi
   const handleSubmit = (e) => {
     e.preventDefault();
     const jobPost = {
@@ -26,26 +25,33 @@ export default function JobPostCreate() {
       requiredSkills,
     };
 
+    const clearStates = () => {
+      setCompany("");
+      setLocation("");
+      setTitle("");
+      setDescription("");
+      setActivationTime("");
+      setClosureTime("");
+      setRequiredSkills([]);
+      setNewSkill("");
+    };
     let jobPostService = new JobPostService();
     jobPostService
       .createJobPost(humanResource.token, jobPost)
       .then((result) => {
-        debugger;
+        clearStates();
         toast.success(result.data);
       })
       .catch((err) => {
-        debugger;
         toast.error(err.response.data.error_message.toString());
       });
   };
-  // Yeni beceri ekleme işlemi
   const handleAddSkill = () => {
     if (newSkill.trim() === "") return;
     setRequiredSkills([...requiredSkills, newSkill.trim()]);
     setNewSkill("");
   };
 
-  // Beçeri silme işlemi
   const handleRemoveSkill = (skill) => {
     const updatedSkills = requiredSkills.filter((s) => s !== skill);
     setRequiredSkills(updatedSkills);
@@ -165,7 +171,7 @@ export default function JobPostCreate() {
                 Aktif Olma Tarihi
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 id="activationTime"
                 value={activationTime}
                 onChange={(e) => setActivationTime(e.target.value)}

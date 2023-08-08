@@ -3,10 +3,10 @@ package obss.hris.business.abstracts;
 import jakarta.servlet.http.HttpServletRequest;
 import obss.hris.model.entity.HumanResource;
 import obss.hris.model.entity.JobApplicationStatus;
-import obss.hris.model.entity.JobPost;
-import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.HumanResourceLoginRequest;
-import obss.hris.model.response.*;
+import obss.hris.model.response.GetHumanResourceResponse;
+import obss.hris.model.response.GetJobPostApplicationResponse;
+import obss.hris.model.response.LoginResponse;
 
 import java.util.List;
 

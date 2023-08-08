@@ -13,13 +13,10 @@ export default function JobPosts() {
   const candidate = getCandidate();
   const handleApply = () => {
     let jobPostService = new JobPostService();
-    jobPostService.
-    applyToJobPost(candidate.token, currentJobPost.jobPostId)
+    jobPostService.applyToJobPost(candidate.token, currentJobPost.jobPostId)
     .then((result) => {
-      debugger;
       toast.success(result.data);
     }).catch((err) => {
-      debugger;
       toast.error(err.response.data.error_message);
     })
   }
@@ -31,9 +28,6 @@ export default function JobPosts() {
       .then((result) => {
         setJobPosts(result.data);
         setCurrentJobPost(result.data[0]);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   }, []);
   const handlePageChange = (page) => {
@@ -47,9 +41,6 @@ export default function JobPosts() {
           setJobPosts(result.data);
           setCurrentJobPost(result.data[0]);
         }
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
   return (

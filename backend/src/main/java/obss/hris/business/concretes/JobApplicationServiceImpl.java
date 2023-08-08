@@ -1,21 +1,16 @@
 package obss.hris.business.concretes;
 
-import co.elastic.clients.elasticsearch.ml.Job;
 import lombok.AllArgsConstructor;
-import obss.hris.business.abstracts.CandidateService;
 import obss.hris.business.abstracts.ElasticSearchService;
 import obss.hris.business.abstracts.JobApplicationService;
-import obss.hris.business.abstracts.JobPostService;
 import obss.hris.core.util.MailService;
 import obss.hris.core.util.mapper.ModelMapperService;
-import obss.hris.exception.CandidateNotFoundException;
 import obss.hris.exception.JobPostNotFoundException;
 import obss.hris.model.entity.*;
 import obss.hris.model.response.GetCandidateJobApplicationResponse;
 import obss.hris.model.response.GetJobPostApplicationResponse;
 import obss.hris.repository.JobApplicationRepository;
 import org.apache.commons.text.similarity.JaccardSimilarity;
-import org.modelmapper.TypeMap;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

@@ -32,14 +32,10 @@ export default function JobPostApplications() {
       )
       .then((result) => {
         setJobPostApplications(result.data);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
 
   const handleFilter = (status) => {
-    debugger;
     if (filter === status) {
       setFilter(false);
       setPage(0);
@@ -69,13 +65,9 @@ export default function JobPostApplications() {
           setPage(page);
           setJobPostApplications(result.data);
         }
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
   const updateJobApplicationStatus = (id, status) => {
-    debugger;
     let jobApplicationService = new JobApplicationService();
     jobApplicationService
       .updateStatus(humanResource.token, id, status)
@@ -99,32 +91,6 @@ export default function JobPostApplications() {
     } else {
       setSearchKeyword(keyword);
     }
-    // if (keyword === "") {
-    //   setFilteredJobApplications(jobPostApplications);
-    //   return;
-    // }
-    // let searchService = new SearchService();
-    // searchService
-    //   .searchOnCandidateForJobPost(
-    //     humanResource.token,
-    //     keyword,
-    //     page,
-    //     process.env.REACT_APP_PAGE_SIZE,
-    //     id
-    //   )
-    //   .then((result) => {
-    //     const matchingCandidateIds = result.data.map(
-    //       (candidate) => candidate.candidateId
-    //     );
-    //     const filteredJobApplications = jobPostApplications.filter(
-    //       (jobApplication) =>
-    //         matchingCandidateIds.includes(jobApplication.candidateId)
-    //     );
-    //     setFilteredJobApplications(filteredJobApplications);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
   };
   return (
     <main className="wrapper flex bg-job-posts-background pl-48 pr-48 pb-8">

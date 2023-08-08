@@ -1,11 +1,7 @@
-import SyncIcon from "@mui/icons-material/Sync";
-import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
-import BlockIcon from "@mui/icons-material/Block";
 import Pagination from "../components/Pagination";
 import CandidateCard from "../components/CandidateCard";
 import SearchService from "../services/searchService";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getHumanResource } from "../store/storage";
 export default function CandidateSearch(props) {
@@ -28,14 +24,9 @@ export default function CandidateSearch(props) {
           setPage(page);
           setCandidates(result.data);
         }
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
   useEffect(() => {
-    debugger;
-
     let searchService = new SearchService();
     searchService
       .searchOnCandidate(
@@ -46,9 +37,6 @@ export default function CandidateSearch(props) {
       )
       .then((result) => {
         setCandidates(result.data);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   }, [keyword ]);
   return (

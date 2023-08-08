@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CandidateService from "../services/candidateService";
 import { getCandidate, getHumanResource } from "../store/storage";
+import CandidateJobApplicationDetail from "../components/CandidateJobApplicationDetail";
 
 export default function CandidateJobApplication() {
   let { id } = useParams();
@@ -31,9 +32,6 @@ export default function CandidateJobApplication() {
       .then((result) => {
         setJobApplications(result.data);
         setCurrentJobPost(result.data[0]);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   }, []);
   const handlePageChange = (page) => {
@@ -56,12 +54,9 @@ export default function CandidateJobApplication() {
           setJobApplications(result.data);
           setCurrentJobPost(result.data[0]);
         }
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
-  debugger;
+
   return (
     <main className="wrapper flex bg-job-posts-background pl-48 pr-48">
       <div className="w-1/2 bg-white h-full border shadaow pt-8 overflow-auto">
@@ -82,7 +77,7 @@ export default function CandidateJobApplication() {
       </div>
       <div className="w-1/2 bg-white h-full border shadaow pt-8 overflow-auto">
         {currentJobPost && (
-          <JobPostDetail isApplied={true} {...currentJobPost} />
+          <CandidateJobApplicationDetail {...currentJobPost} />
         )}
       </div>
     </main>

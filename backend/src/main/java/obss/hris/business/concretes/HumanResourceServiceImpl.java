@@ -1,11 +1,9 @@
 package obss.hris.business.concretes;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import obss.hris.business.abstracts.HumanResourceService;
 import obss.hris.business.abstracts.JobApplicationService;
-import obss.hris.business.abstracts.JobPostService;
 import obss.hris.business.abstracts.LdapHumanResourceService;
 import obss.hris.core.util.jwt.JwtUtils;
 import obss.hris.core.util.mapper.ModelMapperService;
@@ -13,18 +11,16 @@ import obss.hris.exception.HumanResourceNotFoundException;
 import obss.hris.model.LdapPeople;
 import obss.hris.model.entity.HumanResource;
 import obss.hris.model.entity.JobApplicationStatus;
-import obss.hris.model.entity.JobPost;
-import obss.hris.model.request.CreateJobPostRequest;
 import obss.hris.model.request.HumanResourceLoginRequest;
-import obss.hris.model.response.*;
+import obss.hris.model.response.GetHumanResourceResponse;
+import obss.hris.model.response.GetJobPostApplicationResponse;
+import obss.hris.model.response.LoginResponse;
 import obss.hris.repository.HumanResourceRepository;
 import org.modelmapper.TypeMap;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 
@@ -71,12 +67,7 @@ public class HumanResourceServiceImpl implements HumanResourceService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
         createHumanResourceIfNoExist(ldapPeople);
         String token = jwtUtils.generateToken(ldapPeople);
-        LoginResponse loginResponse = new LoginResponse(token);
-        HttpSession session = request.getSession(false);
-        if(session != null) {
-            session.invalidate(); // Session'ı sonlandır
-        }
-        return loginResponse;
+        return new LoginResponse(token);
     }
     @Override
     public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus, String searchKeyword) {
