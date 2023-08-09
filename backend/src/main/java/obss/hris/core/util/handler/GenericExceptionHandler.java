@@ -1,9 +1,6 @@
 package obss.hris.core.util.handler;
 
-import obss.hris.exception.CandidateAlreadyBannedException;
-import obss.hris.exception.CandidateBannedException;
-import obss.hris.exception.HumanResourceNotFoundException;
-import obss.hris.exception.JobPostNotFoundException;
+import obss.hris.exception.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +20,12 @@ public class GenericExceptionHandler {
     private final static String ERROR_KEY = "error_message";
     @ExceptionHandler(CandidateAlreadyBannedException.class)
     public ResponseEntity<Map<String, String>> handleCandidateAlreadyBannedException(CandidateAlreadyBannedException e) {
+        Map<String, String> errorResponseMap = new HashMap<>();
+        errorResponseMap.put(ERROR_KEY, e.getMessage());
+        return ResponseEntity.badRequest().body(errorResponseMap);
+    }
+    @ExceptionHandler(JobPostNotActiveException.class)
+    public ResponseEntity<Map<String, String>> handleJobPostNotActiveException(JobPostNotActiveException e) {
         Map<String, String> errorResponseMap = new HashMap<>();
         errorResponseMap.put(ERROR_KEY, e.getMessage());
         return ResponseEntity.badRequest().body(errorResponseMap);

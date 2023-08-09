@@ -5,6 +5,7 @@ import obss.hris.business.abstracts.JobApplicationService;
 import obss.hris.business.abstracts.JobPostService;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.CandidateBannedException;
+import obss.hris.exception.JobPostNotActiveException;
 import obss.hris.exception.JobPostNotFoundException;
 import obss.hris.model.entity.Candidate;
 import obss.hris.model.entity.HumanResource;
@@ -98,6 +99,8 @@ public class JobPostServiceImpl implements JobPostService {
             throw new CandidateBannedException();
         }
         JobPost jobPost = getJobPostById(jobPostId);
+        if(!jobPost.getActive())
+            throw new JobPostNotActiveException();
         jobApplicationService.createJobApplication(jobPost, candidate);
     }
     private String generateJobPostCode(CreateJobPostRequest jobPostRequest) {
