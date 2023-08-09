@@ -103,6 +103,7 @@ public class JobPostServiceImpl implements JobPostService {
             throw new JobPostNotActiveException();
         jobApplicationService.createJobApplication(jobPost, candidate);
     }
+
     private String generateJobPostCode(CreateJobPostRequest jobPostRequest) {
         return "JOB-" + jobPostRequest.getTitle().substring(0,3).toUpperCase()+"-" + LocalDate.now().getDayOfMonth();
     }
