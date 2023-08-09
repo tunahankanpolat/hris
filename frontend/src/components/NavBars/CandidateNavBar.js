@@ -20,7 +20,8 @@ export default function CandidateNavBar() {
       window.location.href = "/";
       }, 1000);
     }).catch((error) => {
-      toast.error(error.response?.data);
+      setCandidate();
+      window.location.href = "/";
     });
   }
   return (

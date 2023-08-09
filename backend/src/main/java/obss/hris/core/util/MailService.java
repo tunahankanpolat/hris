@@ -19,4 +19,12 @@ public class MailService {
 
         javaMailSender.send(mail);
     }
+
+    public void sendMailForCandidateBan(String to, String banReason) {
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(to);
+        mail.setSubject("You are banned");
+        mail.setText("You are banned because of " + banReason + ". All your job applications have been rejected");
+        javaMailSender.send(mail);
+    }
 }

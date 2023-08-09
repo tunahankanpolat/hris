@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import CandidateService from "../services/candidateService";
 import { getCandidate, getHumanResource } from "../store/storage";
 import LinkedinUrlModal from "../components/LinkedinUrlModal";
+import { toast } from "react-toastify";
 export default function CandidateProfile() {
   const { id } = useParams();
   const humanResource = getHumanResource();
@@ -18,6 +19,8 @@ export default function CandidateProfile() {
     }
     candidateService.getCandidateProfile(token, id).then((result) => {
       setCandidate(result.data);
+    }).catch((err) => {
+      toast.error(err.response.data.error_message);
     });
   }, []);
   return (

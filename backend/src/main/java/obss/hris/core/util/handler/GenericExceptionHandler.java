@@ -79,6 +79,14 @@ public class GenericExceptionHandler {
         errorResponseMap.put(ERROR_KEY, "İnsan kaynakları bulunamadı.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseMap);
     }
+
+    @ExceptionHandler(CandidateNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCandidateNotFoundException(CandidateNotFoundException e) {
+        Map<String, String> errorResponseMap = new HashMap<>();
+        errorResponseMap.put(ERROR_KEY, "Aday bulunamadı.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseMap);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> errorResponseMap = new HashMap<>();

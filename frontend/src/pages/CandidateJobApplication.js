@@ -1,5 +1,5 @@
 import CandidateJobApplicationCard from "../components/CandidateJobApplicationCard";
-import JobPostDetail from "../components/JobPostDetail";
+import { toast } from "react-toastify";
 import Pagination from "../components/Pagination";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -32,7 +32,10 @@ export default function CandidateJobApplication() {
       .then((result) => {
         setJobApplications(result.data);
         setCurrentJobPost(result.data[0]);
+      }).catch((err) => {
+        toast.error(err.response.data.error_message);
       });
+        ;
   }, []);
   const handlePageChange = (page) => {
     let candidateService = new CandidateService();
