@@ -1,6 +1,5 @@
 import JobPosts from "./pages/JobPosts";
 import Login from "./pages/Login";
-import CandidateScrape from "./pages/CandidateScrape";
 import HumanResourcePrivateRoute from "./components/PrivateRouters/HumanResourcePrivateRoute";
 import PublicPrivateRoute from "./components/PrivateRouters/PublicPrivateRoute";
 import HumanResouceJobPosts from "./pages/HumanResourceJobPosts";
@@ -83,10 +82,6 @@ const routes = [
         candidateAuth: true,
       },
     ],
-  },
-  {
-    path: "candidate/scrape/skills",
-    element: <CandidateScrape />,
   },
   {
     path: "oauth2/redirect",

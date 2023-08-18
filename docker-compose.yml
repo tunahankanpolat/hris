@@ -1,0 +1,82 @@
+version: '3.9'
+services:
+  obss-ldap:
+    container_name: obss-ldap
+    image: osixia/openldap
+    environment:
+      LDAP_ORGANISATION: "OBSS"
+      LDAP_DOMAIN: "obss.tech"
+      LDAP_ADMIN_PASSWORD: "123"
+    ports:
+      - "389:389"
+      - "636:636"
+
+  obss-postgre:
+    container_name: obss-postgre
+    image: postgres
+    volumes:
+      - C:\Users\Tuna\docker\volumes\postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "123456"
+    ports:
+      - "5432:5432"
+
+  obss-elastic:
+    container_name: obss-elastic
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.12
+    environment:
+      discovery.type: "single-node"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  obss-selenium:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    shm_size: 2g
+
+  obss-scrape:
+    build: ./scrape
+    ports:
+      - "8081:8081"
+    depends_on:
+      - obss-selenium
+
+  obss-backend:
+    build: ./backend
+    container_name: obss-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - obss-postgre
+      - obss-ldap
+      - obss-elastic
+      - obss-scrape
+
+  obss-frontend:
+    build: ./frontend
+    container_name: obss-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - obss-backend
+
+# version: '3'
+# services:
+#   obss-selenium:
+#     image: selenium/standalone-chrome:latest
+#     ports:
+#       - "4444:4444"
+#       - "7900:7900"
+#     shm_size: 2g
+#
+#   obss-scrape:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8081:8081"
+#     depends_on:
+#       - obss-selenium
