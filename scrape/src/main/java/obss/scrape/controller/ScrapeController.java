@@ -1,6 +1,5 @@
 package obss.scrape.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import obss.scrape.dto.CandidateScrapeResponse;
 import obss.scrape.service.ScrapeService;
 import org.springframework.beans.factory.annotation.Autowired;

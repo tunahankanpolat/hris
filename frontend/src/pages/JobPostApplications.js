@@ -1,4 +1,3 @@
-import React from "react";
 import JobPostApplicationCard from "../components/JobPostApplicationCard";
 import Pagination from "../components/Pagination";
 import SyncIcon from "@mui/icons-material/Sync";

@@ -1,12 +1,9 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import WorkIcon from "@mui/icons-material/Work";
 import AddIcon from '@mui/icons-material/Add';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SearchBar from "../SearchBar";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { setHumanResource } from "../../store/storage";
 export default function HumanResourceNavBar() {
   const handleLogout = async () => {
@@ -14,7 +11,6 @@ export default function HumanResourceNavBar() {
     window.location.href = "/";
   }
   const navigate = useNavigate();
-  const [searchKeyword, setSearchKeyword] = useState(false);
 
   const handleSearch = (keyword) => {
     setSearchKeyword(keyword);

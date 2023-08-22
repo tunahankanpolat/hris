@@ -5,11 +5,9 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { getCandidate, setCandidate } from "../../store/storage";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import CandidateService from "../../services/candidateService";
 export default function CandidateNavBar() {
-  const navigate = useNavigate();
   const handleLogout = async () => {
     let candidateService = new CandidateService();
 

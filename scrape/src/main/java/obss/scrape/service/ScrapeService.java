@@ -62,8 +62,7 @@ public class ScrapeService {
     private WebDriver getRemoteWebDriver(String webDriverUrl){
         try {
             ChromeOptions options = new ChromeOptions();
-            WebDriver webDriver = new RemoteWebDriver(new URL(webDriverUrl), options);
-            return webDriver;
+            return new RemoteWebDriver(new URL(webDriverUrl), options);
         }catch (MalformedURLException e){
             throw new RuntimeException("Invalid web driver url");
         }
