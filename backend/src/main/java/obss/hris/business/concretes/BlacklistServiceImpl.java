@@ -41,9 +41,7 @@ public class BlacklistServiceImpl implements BlacklistService {
     }
 
     private void sendMailWithNewThread(String to, String banReason){
-        Runnable mailSendingTask = () -> {
-            mailService.sendMailForCandidateBan(to, banReason);
-        };
+        Runnable mailSendingTask = () -> mailService.sendMailForCandidateBan(to, banReason);
         executorService.submit(mailSendingTask);
     }
 }

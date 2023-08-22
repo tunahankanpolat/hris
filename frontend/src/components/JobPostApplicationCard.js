@@ -1,4 +1,3 @@
-import React from "react";
 import SyncIcon from "@mui/icons-material/Sync";
 import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
 import BlockIcon from "@mui/icons-material/Block";

@@ -149,9 +149,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     }
 
     private void sendMailWithNewThread(String to, String jobPostTitle, String status){
-        Runnable mailSendingTask = () -> {
-            mailService.sendMailForJobApplicationStatusChange(to, jobPostTitle, status);
-        };
+        Runnable mailSendingTask = () -> mailService.sendMailForJobApplicationStatusChange(to, jobPostTitle, status);
         executorService.submit(mailSendingTask);
     }
 

@@ -20,7 +20,7 @@ public class JwtUtils {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    private final String AUTHORITIES_KEY = "authorities";
+    private static final String AUTHORITIES_KEY = "authorities";
 
     @PostConstruct
     protected void init() {
@@ -49,11 +49,11 @@ public class JwtUtils {
     }
 
     public String extractAuthority(String token) {
-        List authorities = extractAllClaims(token).get(AUTHORITIES_KEY, ArrayList.class);
+        List<Claims> authorities = extractAllClaims(token).get(AUTHORITIES_KEY, ArrayList.class);
         if(authorities == null || authorities.isEmpty()){
             return null;
         }
-        LinkedHashMap authority = (LinkedHashMap) authorities.get(0);
+        LinkedHashMap<String, Object> authority = (LinkedHashMap) authorities.get(0);
         return authority.get("authority").toString();
     }
 

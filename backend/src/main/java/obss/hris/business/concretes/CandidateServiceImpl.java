@@ -4,7 +4,6 @@ import obss.hris.business.abstracts.CandidateService;
 import obss.hris.business.abstracts.CustomOAuth2UserService;
 import obss.hris.business.abstracts.ElasticSearchService;
 import obss.hris.business.abstracts.JobApplicationService;
-import obss.hris.core.util.jwt.JwtUtils;
 import obss.hris.core.util.mapper.ModelMapperService;
 import obss.hris.exception.CandidateNotFoundException;
 import obss.hris.exception.LinkedinScrapeException;
@@ -78,7 +77,7 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     @Override
     public Candidate getCandidateById(Long candidateId) {
         return candidateRepository.findById(candidateId)
-                .orElseThrow(() -> new CandidateNotFoundException());
+                .orElseThrow( CandidateNotFoundException::new);
     }
 
     @Override

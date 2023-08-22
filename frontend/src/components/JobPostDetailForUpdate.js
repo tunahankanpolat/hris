@@ -47,7 +47,6 @@ export default function JobPostDetailForUpdate(props) {
       title: title,
       company: company,
       location: location,
-      requiredSkills: skills,
       description: description,
       requiredSkills: skills,
       closureTime: closureTime,

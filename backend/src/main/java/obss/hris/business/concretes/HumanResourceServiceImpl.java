@@ -71,16 +71,15 @@ public class HumanResourceServiceImpl implements HumanResourceService {
     }
     @Override
     public List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size, JobApplicationStatus jobApplicationStatus, String searchKeyword) {
-        if (jobApplicationStatus != null && searchKeyword == null) {
-            return jobApplicationService.getJobPostApplicationsByPageByStatus(jobPostId, page, size, jobApplicationStatus);
-        } else if(jobApplicationStatus == null && searchKeyword != null) {
-            return jobApplicationService.getJobPostApplicationsByPageBySearchKeyword(jobPostId, page, size, searchKeyword);
-        } else if(jobApplicationStatus != null && searchKeyword != null) {
+        if(jobApplicationStatus != null && searchKeyword != null) {
             return jobApplicationService.getJobPostApplicationsByPageByStatusBySearchKeyword(jobPostId, page, size, jobApplicationStatus, searchKeyword);
-        }else{
+        } else if (jobApplicationStatus != null){
+            return jobApplicationService.getJobPostApplicationsByPageByStatus(jobPostId, page, size, jobApplicationStatus);
+        } else if (searchKeyword != null){
+            return jobApplicationService.getJobPostApplicationsByPageBySearchKeyword(jobPostId, page, size, searchKeyword);
+        }else {
             return jobApplicationService.getJobPostApplicationsByPage(jobPostId, page, size);
         }
-
     }
 
     private void createHumanResourceIfNoExist(LdapPeople ldapPeople) {
@@ -91,7 +90,7 @@ public class HumanResourceServiceImpl implements HumanResourceService {
                 typeMap = this.modelMapperService.forCreate().createTypeMap(LdapPeople.class, HumanResource.class);
 
                 typeMap.addMappings(
-                        mapper -> mapper.map(src -> src.getUsername(), HumanResource::setUserName)
+                        mapper -> mapper.map(LdapPeople::getUsername, HumanResource::setUserName)
                 );
             }
             humanResource = modelMapperService.forCreate().map(ldapPeople, HumanResource.class);

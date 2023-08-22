@@ -42,8 +42,8 @@ public class WebSecurityConfig {
 
     private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final String HR_ROLE = "HR_USER";
-    private final String CANDIDATE_ROLE = "OAUTH2_USER";
+    private static final String HR_ROLE = "HR_USER";
+    private static final String CANDIDATE_ROLE = "OAUTH2_USER";
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -74,9 +74,9 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAnyAuthority(HR_ROLE,CANDIDATE_ROLE)
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(config -> {
-                    config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
+                .sessionManagement(config ->
+                    config.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .tokenEndpoint(token
                                 -> token.accessTokenResponseClient(linkedinTokenResponseClient()))

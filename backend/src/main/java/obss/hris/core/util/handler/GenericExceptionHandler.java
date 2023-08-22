@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GenericExceptionHandler {
-    private final static String ERROR_KEY = "error_message";
+    private static final String ERROR_KEY = "error_message";
     @ExceptionHandler(CandidateAlreadyBannedException.class)
     public ResponseEntity<Map<String, String>> handleCandidateAlreadyBannedException(CandidateAlreadyBannedException e) {
         Map<String, String> errorResponseMap = new HashMap<>();

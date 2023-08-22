@@ -27,7 +27,6 @@ public class GetJobPostResponse {
         return activationTime != null && closureTime != null && now.after(activationTime) && now.before(closureTime);
     }
     public boolean setActive() {
-        Date now = new Date(System.currentTimeMillis());
-        return activationTime != null && closureTime != null && now.after(activationTime) && now.before(closureTime);
+        return getActive();
     }
 }

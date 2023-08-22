@@ -33,7 +33,11 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
     @Value("${linkedin.revoke.api}")
     private String revokeUri;
     private static final String INVALID_USER_INFO_RESPONSE_ERROR_CODE = "invalid_user_info_response";
-
+    private static final String FIRST_NAME = "firstName";
+    private static final String LAST_NAME = "lastName";
+    private static final String ELEMENTS = "elements";
+    private static final String PROFILE_PICTURE = "profilePicture";
+    private static final String PREFERRED_LOCALE = "preferredLocale";
     private static final ParameterizedTypeReference<Map<String, Object>> PARAMETERIZED_RESPONSE_TYPE = new ParameterizedTypeReference<Map<String, Object>>() {};
 
     private RestOperations restOperations;
@@ -67,13 +71,13 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        MultiValueMap headers = new LinkedMultiValueMap<String,String>();
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add("Accept", "application/json");
         headers.add("Authorization", "Bearer " + userRequest.getAccessToken().getTokenValue());
         URI uri = URI.create(userEmailUri);
-        RequestEntity request = new RequestEntity(headers, HttpMethod.GET, uri);
+        RequestEntity<Map<String, Object>> request = new RequestEntity<>(headers, HttpMethod.GET, uri);
 
-        ResponseEntity<Map<String, Object>> response = getResponse(userRequest, request);
+        ResponseEntity<Map<String, Object>> response = getResponseOfRequest(userRequest, request);
         Map<String, Object> emailMap = response.getBody();
         Map<String, Object> map = oAuth2User.getAttributes();
         oAuth2User.getName();
@@ -81,20 +85,20 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
         jsonObject.put("linkedinId", jsonObject.get("id"));
         jsonObject.remove("id");
         JSONObject emailJson = new JSONObject(emailMap);
-        jsonObject.put("firstName", getFirstName(jsonObject));
-        jsonObject.put("lastName", getLastName(jsonObject));
-        jsonObject.put("profilePicture", getProfilePicture(jsonObject));
+        jsonObject.put(FIRST_NAME, getFirstName(jsonObject));
+        jsonObject.put(LAST_NAME, getLastName(jsonObject));
+        jsonObject.put(PROFILE_PICTURE, getProfilePicture(jsonObject));
         jsonObject.put("email", getEmail(emailJson));
         return new DefaultOAuth2User(oAuth2User.getAuthorities(), jsonObject.toMap(), "linkedinId");
     }
 
     private String getFirstName(JSONObject jsonObject) {
         try{
-            return jsonObject.getJSONObject("firstName").getJSONObject("localized")
-                    .getString(jsonObject.getJSONObject("firstName")
-                            .getJSONObject("preferredLocale").getString("language")
-                            + "_" + jsonObject.getJSONObject("firstName")
-                            .getJSONObject("preferredLocale").getString("country"));
+            return jsonObject.getJSONObject(FIRST_NAME).getJSONObject("localized")
+                    .getString(jsonObject.getJSONObject(FIRST_NAME)
+                            .getJSONObject(PREFERRED_LOCALE).getString("language")
+                            + "_" + jsonObject.getJSONObject(FIRST_NAME)
+                            .getJSONObject(PREFERRED_LOCALE).getString("country"));
         }catch (Exception e){
             return null;
         }
@@ -102,11 +106,11 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
 
     private String getLastName(JSONObject jsonObject) {
         try{
-            return jsonObject.getJSONObject("lastName").getJSONObject("localized")
-                    .getString(jsonObject.getJSONObject("lastName")
-                            .getJSONObject("preferredLocale").getString("language")
-                            + "_" + jsonObject.getJSONObject("lastName")
-                            .getJSONObject("preferredLocale").getString("country"));
+            return jsonObject.getJSONObject(LAST_NAME).getJSONObject("localized")
+                    .getString(jsonObject.getJSONObject(LAST_NAME)
+                            .getJSONObject(PREFERRED_LOCALE).getString("language")
+                            + "_" + jsonObject.getJSONObject(LAST_NAME)
+                            .getJSONObject(PREFERRED_LOCALE).getString("country"));
         }catch (Exception e){
             return null;
         }
@@ -114,9 +118,9 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
 
     private String getProfilePicture(JSONObject jsonObject) {
         try{
-            int size = jsonObject.getJSONObject("profilePicture").getJSONObject("displayImage~").getJSONArray("elements").length();
-            JSONObject element = (JSONObject) jsonObject.getJSONObject("profilePicture").getJSONObject("displayImage~")
-                    .getJSONArray("elements").get(size - 1);
+            int size = jsonObject.getJSONObject(PROFILE_PICTURE).getJSONObject("displayImage~").getJSONArray(ELEMENTS).length();
+            JSONObject element = (JSONObject) jsonObject.getJSONObject(PROFILE_PICTURE).getJSONObject("displayImage~")
+                    .getJSONArray(ELEMENTS).get(size - 1);
             int identifiersSize = element.getJSONArray("identifiers").length();
             JSONObject identifier = element.getJSONArray("identifiers").getJSONObject(identifiersSize - 1);
             return identifier.getString("identifier");
@@ -127,8 +131,8 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
 
     private String getEmail(JSONObject jsonObject) {
         try{
-            int size = jsonObject.getJSONArray("elements").length();
-            JSONObject element = (JSONObject) jsonObject.getJSONArray("elements").get(size - 1);
+            int size = jsonObject.getJSONArray(ELEMENTS).length();
+            JSONObject element = (JSONObject) jsonObject.getJSONArray(ELEMENTS).get(size - 1);
 
             return element.getJSONObject("handle~").getString("emailAddress");
         }catch (Exception e){
@@ -136,7 +140,7 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
-    private ResponseEntity<Map<String, Object>> getResponse(OAuth2UserRequest userRequest, RequestEntity<?> request) {
+    private ResponseEntity<Map<String, Object>> getResponseOfRequest(OAuth2UserRequest userRequest, RequestEntity<?> request) {
         try {
             return this.restOperations.exchange(request, PARAMETERIZED_RESPONSE_TYPE);
         }

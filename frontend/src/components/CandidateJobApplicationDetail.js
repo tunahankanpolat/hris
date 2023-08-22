@@ -2,12 +2,8 @@ import React from "react";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import LaunchIcon from "@mui/icons-material/Launch";
-import LinkedinLoginButton from "./LinkedinLoginButton";
-import { getCandidate } from "../store/storage";
 
 export default function CandidateJobApplicationDetail(props) {
-  const candidate = getCandidate();
   return (
     <div className="w-full h-full flex flex-col px-7 gap-12">
       <div>
