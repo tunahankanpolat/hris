@@ -39,13 +39,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         this.jobApplicationRepository.save(newJobApplication);
         return newJobApplication;
     }
-    public void sa(){
-        List<JobApplication> jobs = jobApplicationRepository.findAll();
-        for(JobApplication jobApplication : jobs){
-            jobApplication.setEligibility(calculateScore(jobApplication.getJobPost(), jobApplication.getCandidate()));
-            jobApplicationRepository.save(jobApplication);
-        }
-    }
+
     private Double calculateScore(JobPost jobPost, Candidate candidate){
         JaccardSimilarity jaccardSimilarity = new JaccardSimilarity();
         double totalScore = 0.0;

@@ -30,8 +30,8 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.getCandidateByIdForRequest(candidateId));
     }
     @GetMapping("/logout")
-    public ResponseEntity<String> logout(@AuthenticationPrincipal OAuth2User oauth2User, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
-        return candidateService.logout(authorizedClient);
+    public ResponseEntity<String> logout(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+        return ResponseEntity.ok(candidateService.logout(authorizedClient));
     }
 
     @Transactional

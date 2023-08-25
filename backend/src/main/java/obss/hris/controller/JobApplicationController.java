@@ -18,11 +18,6 @@ public class JobApplicationController {
         return ResponseEntity.ok("Job application status updated successfully");
     }
 
-    @GetMapping("sa")//uygulamada kullanılmıyor, sadece sunum için ekledim
-    public ResponseEntity<String> sa() {
-        jobApplicationService.sa();
-        return ResponseEntity.ok("Job application status updated successfully");
-    }
     @DeleteMapping("/{jobApplicationId}")
     public ResponseEntity<String> deleteJobApplication(@PathVariable Long jobApplicationId) {
         jobApplicationService.deleteJobApplication(jobApplicationId);

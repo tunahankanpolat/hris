@@ -51,7 +51,7 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
         this.restOperations = restTemplate;
     }
 
-    public ResponseEntity<String> revokeUser(OAuth2AuthorizedClient authorizedClient){
+    public String revokeUser(OAuth2AuthorizedClient authorizedClient){
         String clientId = authorizedClient.getClientRegistration().getClientId();
         String clientSecret = authorizedClient.getClientRegistration().getClientSecret();
         String token = authorizedClient.getAccessToken().getTokenValue();
@@ -64,8 +64,7 @@ public class LinkedinOAuth2UserService extends DefaultOAuth2UserService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<?> request = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restOperations.exchange(revokeUri, HttpMethod.POST, request, String.class);
-        String body = response.getStatusCode() == HttpStatus.OK ? "Başarılı bir şekilde çıkış yapıldı." : "Çıkış yapılırken bir hata oluştu.";
-        return ResponseEntity.status(response.getStatusCode()).body(body);
+        return response.getStatusCode() == HttpStatus.OK ? "Başarılı bir şekilde çıkış yapıldı." : "Çıkış yapılırken bir hata oluştu.";
     }
 
     @Override

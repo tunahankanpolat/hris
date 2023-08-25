@@ -58,9 +58,8 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
     }
 
     @Override
-    public ResponseEntity<String> logout(OAuth2AuthorizedClient authorizedClient) {
-        return linkedinOAuth2UserService.revokeUser(authorizedClient).getBody() != null ?
-                ResponseEntity.ok("Logout Successful") : ResponseEntity.badRequest().body("Logout Failed");
+    public String logout(OAuth2AuthorizedClient authorizedClient) {
+        return linkedinOAuth2UserService.revokeUser(authorizedClient);
     }
 
     @Override
@@ -107,8 +106,10 @@ public class CandidateServiceImpl implements CandidateService, CustomOAuth2UserS
             }
             isCandidateUpdated = true;
         }
-        if(isCandidateUpdated)
+        if(isCandidateUpdated){
             candidateRepository.save(candidate);
+            elasticSearchService.saveCandidate(modelMapperService.forCreate().map(candidate, ElkCandidate.class));
+        }
         return "Başarılı bir şekilde bilgileriniz güncellendi.";
     }
 

@@ -48,30 +48,23 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .cors().configurationSource(corsConfigurationSource).and()
+                .csrf(csrf -> csrf.disable())
+                .cors(configurer -> configurer.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/",
-                                "/error").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/logout").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.PUT,"/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/hr/v1/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/logout").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.POST,"/api/blacklist/v1/banCandidate").hasAnyAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/me").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/hr/v1/me/**").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.GET,"logout").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.PUT,"/api/jobPosts/v1").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.DELETE,"/api/jobPosts/v1/**").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/search/v1/**").hasAuthority(HR_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/{jobPostId}/apply").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.PUT,"/api/jobApplications/v1/{jobApplicationId}/status").hasAuthority(HR_ROLE)
+                        .requestMatchers("/", "/error", "/api/hr/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/{page}/{size}").permitAll()
+
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/{candidateId}/**").hasAnyAuthority(HR_ROLE, CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAnyAuthority(CANDIDATE_ROLE)
                         .requestMatchers(HttpMethod.DELETE,"/api/jobApplications/v1").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/jobApplications/v1/sa").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/scrape/linkedin").hasAuthority(CANDIDATE_ROLE)
-                        .requestMatchers(HttpMethod.GET,"/api/candidate/v1/**").hasAnyAuthority(HR_ROLE,CANDIDATE_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/jobPosts/v1/{jobPostId}/apply").hasAuthority(CANDIDATE_ROLE)
+
+                        .requestMatchers("/api/hr/v1/**").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.POST,"/api/blacklist/v1/banCandidate").hasAnyAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.PUT,"/api/jobApplications/v1/{jobApplicationId}/status").hasAuthority(HR_ROLE)
+                        .requestMatchers("/api/jobPosts/v1/**").hasAuthority(HR_ROLE)
+                        .requestMatchers(HttpMethod.GET,"/api/search/v1/**").hasAuthority(HR_ROLE)
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(config ->
@@ -92,12 +85,12 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error_message\":\"" + authException.getMessage() + "\"}");
+                            response.getWriter().write("{\"error\":\"" + authException.getMessage() + "\"}");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpStatus.FORBIDDEN.value());
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error_message\":\"" + accessDeniedException.getMessage() + "\"}");
+                            response.getWriter().write("{\"error\":\"" + accessDeniedException.getMessage() + "\"}");
                         }))
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -119,8 +112,4 @@ public class WebSecurityConfig {
         client.setRestOperations(restOperations);
         return client;
     }
-
-
-
-
 }

@@ -13,7 +13,6 @@ export default function HumanResourceNavBar() {
   const navigate = useNavigate();
 
   const handleSearch = (keyword) => {
-    setSearchKeyword(keyword);
     navigate(`/search/candidate/${keyword}`)
 };
 

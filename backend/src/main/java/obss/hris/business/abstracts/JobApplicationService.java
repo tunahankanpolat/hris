@@ -23,6 +23,4 @@ public interface JobApplicationService {
     List<GetJobPostApplicationResponse> getJobPostApplicationsByPage(Long jobPostId, int page, int size);
     List<JobApplication> getCandidateJobApplications(Long candidateId);
     void batchUpdateStatus(List<JobApplication> jobApplications, JobApplicationStatus jobApplicationStatus);
-
-    void sa();
 }
