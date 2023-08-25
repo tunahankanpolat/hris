@@ -61,7 +61,7 @@ export default function JobPostDetailForUpdate(props) {
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data.error_message.toString());
+        toast.error(err.response.data.error.toString());
       });
   };
 
@@ -76,7 +76,7 @@ export default function JobPostDetailForUpdate(props) {
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data.error_message.toString());
+        toast.error(err.response.data.error.toString());
       });
   };
 

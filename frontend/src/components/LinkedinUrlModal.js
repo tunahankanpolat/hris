@@ -10,7 +10,7 @@ const LinkedinUrlModal = ({ onClose}) => {
     candidateService.scrapeLinkedinProfile(candidate.token,linkedinUrl).then((result) => {
         toast.success(result.data);
     }).catch((err) => {
-        toast.error(err.response.data);
+        toast.error(err.response.data.error);
     })
     onClose();
   };

@@ -20,7 +20,7 @@ export default function CandidateProfile() {
     candidateService.getCandidateProfile(token, id).then((result) => {
       setCandidate(result.data);
     }).catch((err) => {
-      toast.error(err.response.data.error_message);
+      toast.error(err.response.data.error);
     });
   }, []);
   return (

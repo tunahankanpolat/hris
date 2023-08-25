@@ -20,7 +20,7 @@ export default function Login() {
         toast.success("Giriş Başarılı");
       })
       .catch((err) => {
-        toast.error(err.response.data.error_message);
+        toast.error(err.response.data.error);
       });
   };
 

@@ -81,7 +81,7 @@ export default function JobPostApplications() {
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data);
+        toast.error(err.response.data.error);
       });
   };
   const handleSearch = (keyword) => {

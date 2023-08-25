@@ -14,7 +14,7 @@ const BanModal = ({ onClose, candidateId}) => {
     blacklistService.addBlacklist(humanResource.token,banRequest).then((res) => {
       toast.success(res.data);
     }).catch((err) => {
-      toast.error(err.response.data.error_message);
+      toast.error(err.response.data.error);
     });
     onClose();
   };

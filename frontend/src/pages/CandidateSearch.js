@@ -24,6 +24,8 @@ export default function CandidateSearch(props) {
           setPage(page);
           setCandidates(result.data);
         }
+      }).catch((err) => {
+        toast.error(err.response.data.error);
       });
   };
   useEffect(() => {

@@ -43,7 +43,7 @@ export default function JobPostCreate() {
         toast.success(result.data);
       })
       .catch((err) => {
-        toast.error(err.response.data.error_message.toString());
+        toast.error(err.response.data.error.toString());
       });
   };
   const handleAddSkill = () => {

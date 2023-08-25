@@ -17,7 +17,7 @@ export default function JobPosts() {
     .then((result) => {
       toast.success(result.data);
     }).catch((err) => {
-      toast.error(err.response.data.error_message);
+      toast.error(err.response.data.error);
     })
   }
 

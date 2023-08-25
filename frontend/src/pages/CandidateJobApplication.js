@@ -33,7 +33,7 @@ export default function CandidateJobApplication() {
         setJobApplications(result.data);
         setCurrentJobPost(result.data[0]);
       }).catch((err) => {
-        toast.error(err.response.data.error_message);
+        toast.error(err.response.data.error);
       });
         ;
   }, []);
